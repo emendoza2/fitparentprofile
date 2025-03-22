@@ -91,4 +91,7 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  img {
+    @apply inline-block; /* wack fix for https://hanki.dev/tailwind-html2canvas-text-shift-down/ */
+  }
 }
