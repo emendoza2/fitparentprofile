@@ -34,7 +34,7 @@ import {
 // import { jsPDF } from "jspdf";
 // import * as canvg from "canvg";
 // import html2canvas from "html2canvas";
-import html2pdf from "html2pdf.js";
+// import html2pdf from "html2pdf.js";
 
 // Reorganize questions to have one from each dimension on each page
 const createInterlacedQuestions = () => {
@@ -394,7 +394,9 @@ export default function PersonalityTest() {
       jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
       pagebreak: { mode: "avoid-all" },
     };
-    html2pdf().from(element).set(opt).save();
+    import("html2pdf.js").then((html2pdf) =>
+      html2pdf.default().from(element).set(opt).save()
+    );
 
     // // Create PDF
     // const pdf = new jsPDF();
