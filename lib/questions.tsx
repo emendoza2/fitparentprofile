@@ -1,6 +1,6 @@
 // Define the 10 parenting principles
 export const dimensions = [
-  "HEAVEN-SEEKING",
+  "TRUTH-SEEKING",
   "EXEMPLIFYING",
   "EMPATHIZING",
   "ATTENDING",
@@ -8,13 +8,13 @@ export const dimensions = [
   "LOVING",
   "TEACHING",
   "TRAINING",
-  "HARMONY-SEEKING",
+  "PEACEMAKING",
   "YIELDING",
 ] as const;
 
 // 10 pages with questions for each principle
 export const personalityQuestions = [
-  // Page 1: HEAVEN-SEEKING
+  // Page 1: TRUTH-SEEKING
   [
     { question: "I teach my child biblical principles and truths." },
     {
@@ -325,7 +325,7 @@ export const personalityQuestions = [
     },
     { question: "I balance discipline with grace and loving guidance." },
   ],
-  // Page 9: HARMONY-SEEKING
+  // Page 9: PEACEMAKING
   [
     { question: "I demonstrate humility by apologizing when I make mistakes." },
     { question: "I regularly ask how I can improve." },
@@ -402,71 +402,71 @@ export const personalityQuestions = [
 
 // Interpretations for each principle based on score ranges
 export const interpretations: Record<string, string[]> = {
-  "HEAVEN-SEEKING": [
+  "TRUTH-SEEKING": [
     "Needs Immediate Attention: Consider making this principle a priority.",
     "Needs Growth: This area needs intentional focus and development.",
-    "Good: You are applying this principle well but may have areas to improve.",
-    "Excellent: You are strongly living out this principle.",
+    "Good job: You are applying this principle well but may have areas to improve.",
+    "Excellent: You are strongly living out this principle. Keep going!",
   ],
   EXEMPLIFYING: [
     "Needs Immediate Attention: Consider making this principle a priority.",
     "Needs Growth: This area needs intentional focus and development.",
-    "Good: You are applying this principle well but may have areas to improve.",
-    "Excellent: You are strongly living out this principle.",
+    "Good job: You are applying this principle well but may have areas to improve.",
+    "Excellent: You are strongly living out this principle. Keep going!",
   ],
   EMPATHIZING: [
     "Needs Immediate Attention: Consider making this principle a priority.",
     "Needs Growth: This area needs intentional focus and development.",
-    "Good: You are applying this principle well but may have areas to improve.",
-    "Excellent: You are strongly living out this principle.",
+    "Good job: You are applying this principle well but may have areas to improve.",
+    "Excellent: You are strongly living out this principle. Keep going!",
   ],
   ATTENDING: [
     "Needs Immediate Attention: Consider making this principle a priority.",
     "Needs Growth: This area needs intentional focus and development.",
-    "Good: You are applying this principle well but may have areas to improve.",
-    "Excellent: You are strongly living out this principle.",
+    "Good job: You are applying this principle well but may have areas to improve.",
+    "Excellent: You are strongly living out this principle. Keep going!",
   ],
   AFFIRMING: [
     "Needs Immediate Attention: Consider making this principle a priority.",
     "Needs Growth: This area needs intentional focus and development.",
-    "Good: You are applying this principle well but may have areas to improve.",
-    "Excellent: You are strongly living out this principle.",
+    "Good job: You are applying this principle well but may have areas to improve.",
+    "Excellent: You are strongly living out this principle. Keep going!",
   ],
   LOVING: [
     "Needs Immediate Attention: Consider making this principle a priority.",
     "Needs Growth: This area needs intentional focus and development.",
-    "Good: You are applying this principle well but may have areas to improve.",
-    "Excellent: You are strongly living out this principle.",
+    "Good job: You are applying this principle well but may have areas to improve.",
+    "Excellent: You are strongly living out this principle. Keep going!",
   ],
   TEACHING: [
     "Needs Immediate Attention: Consider making this principle a priority.",
     "Needs Growth: This area needs intentional focus and development.",
-    "Good: You are applying this principle well but may have areas to improve.",
-    "Excellent: You are strongly living out this principle.",
+    "Good job: You are applying this principle well but may have areas to improve.",
+    "Excellent: You are strongly living out this principle. Keep going!",
   ],
   TRAINING: [
     "Needs Immediate Attention: Consider making this principle a priority.",
     "Needs Growth: This area needs intentional focus and development.",
-    "Good: You are applying this principle well but may have areas to improve.",
-    "Excellent: You are strongly living out this principle.",
+    "Good job: You are applying this principle well but may have areas to improve.",
+    "Excellent: You are strongly living out this principle. Keep going!",
   ],
-  "HARMONY-SEEKING": [
+  PEACEMAKING: [
     "Needs Immediate Attention: Consider making this principle a priority.",
     "Needs Growth: This area needs intentional focus and development.",
-    "Good: You are applying this principle well but may have areas to improve.",
-    "Excellent: You are strongly living out this principle.",
+    "Good job: You are applying this principle well but may have areas to improve.",
+    "Excellent: You are strongly living out this principle. Keep going!",
   ],
   YIELDING: [
     "Needs Immediate Attention: Consider making this principle a priority.",
     "Needs Growth: This area needs intentional focus and development.",
-    "Good: You are applying this principle well but may have areas to improve.",
-    "Excellent: You are strongly living out this principle.",
+    "Good job: You are applying this principle well but may have areas to improve.",
+    "Excellent: You are strongly living out this principle. Keep going!",
   ],
 };
 
 // Colors for each principle
 export const dimensionColors = {
-  "HEAVEN-SEEKING": {
+  "TRUTH-SEEKING": {
     color: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-600",
     bgTranslucent: "bg-blue-600/50",
@@ -546,7 +546,7 @@ export const dimensionColors = {
     fillOpacity: 0.5,
     stroke: "stroke-indigo-600 dark:stroke-indigo-400",
   },
-  "HARMONY-SEEKING": {
+  PEACEMAKING: {
     color: "text-orange-600 dark:text-orange-400",
     bg: "bg-orange-600",
     bgTranslucent: "bg-orange-600/50",
