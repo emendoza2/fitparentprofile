@@ -332,7 +332,7 @@ export default function PersonalityTest() {
   //         <CardContent className="p-6 md:p-8 space-y-6" id="printable">
   //           <div className="text-center space-y-2">
   //             <h2 className="text-2xl md:text-3xl font-bold">
-  //               Your F.I.T. Parent Profile
+  //               Your FIT Parent Profile
   //             </h2>
   //             <p className="text-muted-foreground">
   //               Based on your responses across 10 dimensions
@@ -484,7 +484,7 @@ export default function PersonalityTest() {
               <CardContent className="p-6 md:p-8">
                 <div className="mb-8">
                   <h2 className="text-xl md:text-2xl font-semibold text-center text-primary">
-                    F.I.T. Parent Profile
+                    FIT Parent Profile
                   </h2>
                   <p className="text-center text-muted-foreground mt-2">
                     Page {currentPage + 1} of {totalPages}

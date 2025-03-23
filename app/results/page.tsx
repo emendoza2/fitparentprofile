@@ -135,7 +135,7 @@ const printPage = () => {
 const downloadPDF = async () => {
   const { dismiss } = toast({
     title: "Downloading PDF",
-    description: "Your F.I.T. Parent Profile is being generated as a PDF...",
+    description: "Your FIT Parent Profile is being generated as a PDF...",
   });
 
   const element = document.getElementById("printable");
@@ -367,6 +367,24 @@ function ResultSheet() {
   );
 }
 
+function SharingOptions() {
+  return (
+    <div className="print:hidden">
+      <div className="flex justify-center gap-4 pt-2">
+        <Button onClick={printPage} variant="outline" className="gap-2">
+          <Printer className="w-4 h-4" /> Print
+        </Button>
+        <Button onClick={downloadPDF} variant="outline" className="gap-2">
+          <Download className="w-4 h-4" /> Save as PDF
+        </Button>
+      </div>
+      <div className="pt-2">
+        <SocialShare />
+      </div>
+    </div>
+  );
+}
+
 export default function Results() {
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
@@ -375,33 +393,19 @@ export default function Results() {
           <CardContent className="p-6 md:p-8 space-y-6" id="printable">
             <div className="text-center space-y-2">
               <h2 className="text-2xl md:text-3xl font-bold">
-                Your F.I.T. Parent Profile
+                Your FIT Parent Profile
               </h2>
               <p className="text-muted-foreground">
                 Based on your responses across 10 dimensions
               </p>
-              <div className="flex justify-center gap-4 pt-2">
-                <Button onClick={printPage} variant="outline" className="gap-2">
-                  <Printer className="w-4 h-4" /> Print
-                </Button>
-                <Button
-                  onClick={downloadPDF}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <Download className="w-4 h-4" /> Save as PDF
-                </Button>
-              </div>
-              <div className="pt-2">
-                <SocialShare />
-              </div>
+              <SharingOptions />
             </div>
 
             <Suspense>
               <ResultSheet />
             </Suspense>
 
-            <div className="pt-4">
+            <div className="pt-4 print:hidden">
               <Button
                 // onClick={resetTest}
                 asChild
@@ -412,6 +416,7 @@ export default function Results() {
                 </Link>
               </Button>
             </div>
+            <SharingOptions />
           </CardContent>
         </Card>
       </div>
