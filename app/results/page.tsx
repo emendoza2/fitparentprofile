@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,6 +38,9 @@ import {
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { fitParentResources } from "@/lib/resources";
+import SocialShare from "@/components/social-share";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "@/hooks/use-toast";
 
 // Format scores for radar chart with custom colors
 interface RadarChartDatum {
@@ -130,6 +133,11 @@ const printPage = () => {
   window.print();
 };
 const downloadPDF = async () => {
+  const { dismiss } = toast({
+    title: "Downloading PDF",
+    description: "Your F.I.T. Parent Profile is being generated as a PDF...",
+  });
+
   const element = document.getElementById("printable");
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
@@ -161,9 +169,10 @@ const downloadPDF = async () => {
     jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
     pagebreak: { mode: "avoid-all" },
   };
-  import("html2pdf.js").then((html2pdf) =>
-    html2pdf.default().from(element).set(opt).save()
-  );
+  import("html2pdf.js").then((html2pdf) => {
+    html2pdf.default().from(element).set(opt).save();
+    // dismiss();
+  });
 
   // // Create PDF
   // const pdf = new jsPDF();
@@ -299,7 +308,7 @@ const renderDetailedResources = (dimension: (typeof dimensions)[number]) => {
   );
 };
 
-export default function Results() {
+function ResultSheet() {
   const scoreParam = useSearchParams().get("scores");
   const scores = JSON.parse(atob(scoreParam!)) as Record<
     (typeof dimensions)[number],
@@ -307,6 +316,58 @@ export default function Results() {
   >;
   const radarData = formatScoresForRadarChart(scores);
 
+  return (
+    <>
+      <div className="w-full h-[400px] mt-4">
+        <CustomRadarChart data={radarData} />
+      </div>
+
+      <div className="py-4 space-y-6">
+        {Object.entries(scores).map(([dimension, score]) => (
+          <div key={dimension} className="space-y-2">
+            <div className="flex justify-between items-center">
+              <h3
+                className={cn(
+                  "font-medium flex items-center",
+                  dimensionColors[dimension as keyof typeof dimensionColors]
+                    .color
+                )}
+              >
+                <span
+                  className={cn(
+                    "inline-block w-3 h-3 rounded-full mr-2",
+                    dimensionColors[dimension as keyof typeof dimensionColors]
+                      .bg
+                  )}
+                ></span>
+                {dimension}
+              </h3>
+              <span className="text-sm font-semibold">{score}%</span>
+            </div>
+            <Progress
+              value={score}
+              className="h-2"
+              indicatorClassName={
+                dimensionColors[dimension as keyof typeof dimensionColors]
+                  .bgTranslucent
+              }
+            />
+            <p className="text-sm text-muted-foreground">
+              {getScoreInterpretation(dimension, score)}
+            </p>
+
+            {/* Render detailed resources for this dimension */}
+            {renderDetailedResources(dimension as keyof typeof dimensionColors)}
+
+            <hr className="mt-6 print:mt-4" />
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+export default function Results() {
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       <div className="w-full max-w-4xl mx-auto">
@@ -331,55 +392,14 @@ export default function Results() {
                   <Download className="w-4 h-4" /> Save as PDF
                 </Button>
               </div>
+              <div className="pt-2">
+                <SocialShare />
+              </div>
             </div>
 
-            <div className="w-full h-[400px] mt-4">
-              <CustomRadarChart data={radarData} />
-            </div>
-
-            <div className="py-4 space-y-6">
-              {Object.entries(scores).map(([dimension, score]) => (
-                <div key={dimension} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <h3
-                      className={cn(
-                        "font-medium flex items-center",
-                        dimensionColors[
-                          dimension as keyof typeof dimensionColors
-                        ].color
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "inline-block w-3 h-3 rounded-full mr-2",
-                          dimensionColors[
-                            dimension as keyof typeof dimensionColors
-                          ].bg
-                        )}
-                      ></span>
-                      {dimension}
-                    </h3>
-                    <span className="text-sm font-semibold">{score}%</span>
-                  </div>
-                  <Progress
-                    value={score}
-                    className="h-2"
-                    indicatorClassName={
-                      dimensionColors[dimension as keyof typeof dimensionColors]
-                        .bgTranslucent
-                    }
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    {getScoreInterpretation(dimension, score)}
-                  </p>
-
-                  {/* Render detailed resources for this dimension */}
-                  {renderDetailedResources(dimension)}
-
-                  <hr className="mt-6 print:mt-4" />
-                </div>
-              ))}
-            </div>
+            <Suspense>
+              <ResultSheet />
+            </Suspense>
 
             <div className="pt-4">
               <Button
@@ -395,6 +415,7 @@ export default function Results() {
           </CardContent>
         </Card>
       </div>
+      <Toaster />
     </main>
   );
 }
