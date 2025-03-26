@@ -154,8 +154,8 @@ export default function Assessment() {
               </p>
               <dl className="text-left list-disc list-inside text-sm space-y-6">
                 {principles.map((principle, index) => (
-                  <div>
-                    <dt key={principle.id} className="text-xl mb-3">
+                  <div key={principle.id}>
+                    <dt className="text-xl mb-3">
                       <strong>
                         {principle.title}{" "}
                         <Badge
@@ -176,9 +176,8 @@ export default function Assessment() {
               </dl>
               <p className="text-sm">
                 You’ll rate yourself on 10 statements for each principle using a
-                1–5 scale from Strongly Disagree to Strongly Agree. This will
-                take around 30–60 minutes. Be honest! We're all works in
-                progress.
+                1–5 scale from Strongly Disagree to Strongly Agree. Be honest!
+                We're all works in progress.
               </p>
               <div className="text-left text-xs pt-4 border-t border-muted-foreground/20">
                 <p className="mb-2">
@@ -188,52 +187,6 @@ export default function Assessment() {
                   </Link>
                   .{" "}
                 </p>
-                <p className="font-semibold">Selected References:</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>
-                    Focus on the Family. <em>Parenting resources</em>. Retrieved
-                    from https://www.focusonthefamily.com
-                  </li>
-                  <li>
-                    FamilyLife. <em>Family ministry and parenting insights</em>.
-                    Retrieved from https://www.familylife.com
-                  </li>
-                  <li>
-                    Rosemond, John (2013).{" "}
-                    <em>
-                      Parenting by The Book: Biblical Wisdom for Raising Your
-                      Child
-                    </em>
-                    . Simon and Schuster.
-                  </li>
-                  <li>
-                    Tan-Chi, Peter, & Tan-Chi, Deonna (2020).{" "}
-                    <em>Motivate!: 8 Secrets of Successful Parenting</em>. OMF
-                    Literature.
-                  </li>
-                  <li>
-                    Thomas, Gary (2004).{" "}
-                    <em>
-                      Sacred Parenting: How Raising Children Shapes Our Souls
-                    </em>
-                    . Zondervan.
-                  </li>
-                  <li>
-                    Tripp, Paul David (2016).{" "}
-                    <em>
-                      Parenting: 14 Gospel Principles That Can Radically Change
-                      Your Family
-                    </em>
-                    . Crossway.
-                  </li>
-                  <li>
-                    Faber, Adele, & Mazlish, Elaine (2012).{" "}
-                    <em>
-                      How to Talk So Kids Will Listen & Listen So Kids Will Talk
-                    </em>
-                    . Scribner.
-                  </li>
-                </ul>
               </div>
             </div>
             <CallToAction />

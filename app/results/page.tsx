@@ -242,6 +242,30 @@ const getScoreInterpretation = (dimension: string, score: number) => {
   }
 };
 
+function DotResponseIndicator({
+  score,
+  dimension,
+  className,
+}: {
+  score: number;
+  dimension: keyof typeof dimensionColors;
+  className: string;
+}) {
+  return (
+    <div className={cn("flex gap-x-1", className)}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <span
+          key={i}
+          className={cn(
+            "w-3 h-3 rounded-full block",
+            i <= score ? dimensionColors[dimension].bg : "bg-gray-200"
+          )}
+        />
+      ))}{" "}
+    </div>
+  );
+}
+
 function DetailedResources({
   dimension,
 }: {
@@ -266,6 +290,14 @@ function DetailedResources({
         <ul className="space-y-1 list-disc pl-5">
           {resources.statements.map((statement, index) => (
             <li key={index} className="text-sm">
+              <div className="flex gap-x-2 items-center opacity-50">
+                {statement.statement}
+                <DotResponseIndicator
+                  score={((index * 38129813 + 3) % 4) + 1}
+                  dimension={dimension}
+                  className="flex"
+                />
+              </div>
               {statement.action}
               {/* TODO: add statement.statement to this via dot display */}
             </li>
@@ -295,7 +327,7 @@ function DetailedResources({
                 }
                 target="_blank"
                 rel="noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-sky-11 hover:underline"
               >
                 {verse.reference}
               </a>
@@ -325,7 +357,7 @@ function DetailedResources({
                   href={book.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-blue-600 hover:underline"
+                  className="text-sky-11 hover:underline"
                 >
                   <em>{book.title}</em>
                 </a>
@@ -361,7 +393,7 @@ function DetailedResources({
                   href={article.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-blue-600 hover:underline"
+                  className="text-sky-11 hover:underline"
                 >
                   {article.title}
                 </a>
@@ -554,7 +586,7 @@ export default function Results() {
               <Link
                 href="/research"
                 target="_blank"
-                className="text-blue-600 underline"
+                className="text-sky-11 underline"
               >
                 research
               </Link>

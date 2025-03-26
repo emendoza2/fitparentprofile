@@ -511,9 +511,9 @@ export default function PersonalityTest() {
                           {" "}
                           You’ll rate yourself on 10 statements for each
                           principle using a 1–5 scale from Strongly Disagree to
-                          Strongly Agree. This will take around 30–60 minutes.
-                          You'll get the best results if you&rsquo;re honest and
-                          don&rsquo;t overthink your answers.{" "}
+                          Strongly Agree. You'll get the best results if
+                          you&rsquo;re honest and don&rsquo;t overthink your
+                          answers.{" "}
                         </p>
                       </DialogContent>
                     </Dialog>
