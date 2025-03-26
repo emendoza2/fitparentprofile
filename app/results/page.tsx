@@ -25,6 +25,8 @@ import {
   BookOpen,
   CheckCircle2,
   ExternalLink,
+  ExternalLinkIcon,
+  HelpCircle,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -41,6 +43,18 @@ import { fitParentResources } from "@/lib/resources";
 import SocialShare from "@/components/social-share";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "@/hooks/use-toast";
+import { principles } from "@/lib/principles";
+import {
+  Dialog,
+  DialogFooter,
+  DialogHeader,
+  DialogTrigger,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 // Format scores for radar chart with custom colors
 interface RadarChartDatum {
@@ -61,6 +75,14 @@ const formatScoresForRadarChart = (
     stroke: dimensionColors[dimension].stroke,
   }));
 };
+
+function supportsWebPCanvas() {
+  const canvas = document.createElement("canvas");
+  if (!canvas.getContext) {
+    return false;
+  }
+  return canvas.toDataURL("image/webp").indexOf("data:image/webp") === 0;
+}
 
 // Custom radar chart with dimension-specific colors
 const CustomRadarChart = ({ data }: { data: RadarChartDatum[] }) => {
@@ -110,7 +132,7 @@ const CustomRadarChart = ({ data }: { data: RadarChartDatum[] }) => {
           }}
         />
         <Radar
-          name="Your Profile"
+          name="You scored"
           dataKey="score"
           stroke="black"
           strokeWidth={2}
@@ -122,7 +144,7 @@ const CustomRadarChart = ({ data }: { data: RadarChartDatum[] }) => {
           )}
           fillOpacity={0.5}
         />
-        <Tooltip />
+        <Tooltip formatter={(value, name) => `${value}%`} />
       </RadarChart>
     </ResponsiveContainer>
   );
@@ -164,11 +186,13 @@ const downloadPDF = async () => {
   const opt = {
     margin: 0.5,
     filename: "fit-parent-report.pdf",
-    image: { type: "png" },
-    html2canvas: { scale: 2 }, // Set scale for higher DPI
+    image: { type: supportsWebPCanvas() ? "webp" : "jpeg" },
+    html2canvas: { scale: 1.5 }, // Set scale for higher DPI
     jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
     pagebreak: { mode: "avoid-all" },
   };
+
+  // @ts-ignore: there are no types for html2pdf
   import("html2pdf.js").then((html2pdf) => {
     html2pdf.default().from(element).set(opt).save();
     // dismiss();
@@ -218,9 +242,12 @@ const getScoreInterpretation = (dimension: string, score: number) => {
   }
 };
 
-// Render detailed resources for a specific dimension
-const renderDetailedResources = (dimension: (typeof dimensions)[number]) => {
-  const resources = fitParentResources[dimension];
+function DetailedResources({
+  dimension,
+}: {
+  dimension: (typeof dimensions)[number];
+}) {
+  const resources = principles[dimension];
   if (!resources) return null;
 
   return (
@@ -234,12 +261,13 @@ const renderDetailedResources = (dimension: (typeof dimensions)[number]) => {
           )}
         >
           <Calendar className="h-4 w-4" />
-          Suggestions
+          Act on It
         </h4>
         <ul className="space-y-1 list-disc pl-5">
-          {resources.dailyActions.map((action, index) => (
+          {resources.statements.map((statement, index) => (
             <li key={index} className="text-sm">
-              {action}
+              {statement.action}
+              {/* TODO: add statement.statement to this via dot display */}
             </li>
           ))}
         </ul>
@@ -257,9 +285,21 @@ const renderDetailedResources = (dimension: (typeof dimensions)[number]) => {
           Bible Verses
         </h4>
         <ul className="space-y-1 list-disc pl-5">
-          {resources.bibleVerses.map((verse, index) => (
+          {resources.Scripture.map((verse, index) => (
             <li key={index} className="text-sm">
-              <span dangerouslySetInnerHTML={{ __html: verse }} />
+              <a
+                href={
+                  "https://www.biblegateway.com/passage/?search=" +
+                  encodeURIComponent(verse.reference) +
+                  "&version=ESV"
+                }
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                {verse.reference}
+              </a>
+              : {verse.text}
             </li>
           ))}
         </ul>
@@ -277,11 +317,27 @@ const renderDetailedResources = (dimension: (typeof dimensions)[number]) => {
           Recommended Books & Materials
         </h4>
         <ul className="space-y-1 list-disc pl-5">
-          {resources.books.map((book, index) => (
-            <li key={index} className="text-sm">
-              <span dangerouslySetInnerHTML={{ __html: book }} />
-            </li>
-          ))}
+          {resources.resources
+            .filter((r) => r.category === "Book")
+            .map((book, index) => (
+              <li key={index} className="text-sm">
+                <a
+                  href={book.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  <em>{book.title}</em>
+                </a>
+                :{" "}
+                {book.free && (
+                  <Badge className="text-xs" variant="secondary">
+                    FREE
+                  </Badge>
+                )}{" "}
+                {book.description}
+              </li>
+            ))}
         </ul>
       </div>
 
@@ -297,16 +353,32 @@ const renderDetailedResources = (dimension: (typeof dimensions)[number]) => {
           Additional Articles & Media
         </h4>
         <ul className="space-y-1 list-disc pl-5">
-          {resources.articles.map((article, index) => (
-            <li key={index} className="text-sm">
-              <span dangerouslySetInnerHTML={{ __html: article }} />
-            </li>
-          ))}
+          {resources.resources
+            .filter((r) => r.category !== "Book")
+            .map((article, index) => (
+              <li key={index} className="text-sm">
+                <a
+                  href={article.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  {article.title}
+                </a>
+                :{" "}
+                {article.free && (
+                  <Badge className="text-xs" variant="secondary">
+                    FREE
+                  </Badge>
+                )}{" "}
+                {article.description}
+              </li>
+            ))}
         </ul>
       </div>
     </div>
   );
-};
+}
 
 function ResultSheet() {
   const scoreParam = useSearchParams().get("scores");
@@ -318,11 +390,73 @@ function ResultSheet() {
 
   return (
     <>
+      <div className="text-center text-2xl mt-4 space-y-2">
+        <h3 className="font-bold">You scored</h3>
+        <div className="text-6xl">
+          {Object.values(scores).reduce((a, b) => a + b, 0)}
+        </div>
+        <div>out of 1000</div>
+      </div>
       <div className="w-full h-[400px] mt-4">
         <CustomRadarChart data={radarData} />
       </div>
 
-      <div className="py-4 space-y-6">
+      <div className="py-4 space-y-6 border-t">
+        <h3 className="text-lg font-semibold">Summary</h3>
+        {Object.entries(scores).map(([dimension, score]) => (
+          <div key={dimension} className="space-y-2">
+            <div className="flex justify-between items-center">
+              <h3
+                className={cn(
+                  "font-medium flex items-center",
+                  dimensionColors[dimension as keyof typeof dimensionColors]
+                    .color
+                )}
+              >
+                <span
+                  className={cn(
+                    "inline-block w-3 h-3 rounded-full mr-2",
+                    dimensionColors[dimension as keyof typeof dimensionColors]
+                      .bg
+                  )}
+                ></span>
+                {dimension}
+                <Dialog>
+                  <DialogTrigger>
+                    <HelpCircle
+                      className="h-4 w-4 ml-1 text-muted-foreground opacity-75"
+                      onClick={() => {}}
+                    />
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{dimension}</DialogTitle>
+                    </DialogHeader>
+                    <p>
+                      {principles[dimension as keyof typeof principles].why}
+                    </p>
+                  </DialogContent>
+                </Dialog>
+              </h3>
+              <span className="text-sm font-semibold">{score}%</span>
+            </div>
+            <Progress
+              value={score}
+              className="h-2"
+              indicatorClassName={
+                dimensionColors[dimension as keyof typeof dimensionColors]
+                  .bgTranslucent
+              }
+            />
+            <p className="text-sm text-muted-foreground">
+              {getScoreInterpretation(dimension, score)}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <div className="py-4 space-y-6 border-t">
+        <h3 className="text-lg font-semibold">Breakdown</h3>
         {Object.entries(scores).map(([dimension, score]) => (
           <div key={dimension} className="space-y-2">
             <div className="flex justify-between items-center">
@@ -357,7 +491,9 @@ function ResultSheet() {
             </p>
 
             {/* Render detailed resources for this dimension */}
-            {renderDetailedResources(dimension as keyof typeof dimensionColors)}
+            <DetailedResources
+              dimension={dimension as keyof typeof dimensionColors}
+            />
 
             <hr className="mt-6 print:mt-4" />
           </div>
@@ -391,6 +527,14 @@ export default function Results() {
       <div className="w-full max-w-4xl mx-auto">
         <Card className="border-none shadow-lg">
           <CardContent className="p-6 md:p-8 space-y-6" id="printable">
+            <div className="flex justify-center">
+              <Image
+                src="/fit-parenting-logo.png"
+                width={200}
+                height={200}
+                alt="FIT Parenting Logo"
+              />
+            </div>
             <div className="text-center space-y-2">
               <h2 className="text-2xl md:text-3xl font-bold">
                 Your FIT Parent Profile
@@ -404,6 +548,18 @@ export default function Results() {
             <Suspense>
               <ResultSheet />
             </Suspense>
+
+            <p className="mb-2 text-center">
+              Don't just take our word for it. Dig deeper by checking out our{" "}
+              <Link
+                href="/research"
+                target="_blank"
+                className="text-blue-600 underline"
+              >
+                research
+              </Link>
+              .{" "}
+            </p>
 
             <div className="pt-4 print:hidden">
               <Button

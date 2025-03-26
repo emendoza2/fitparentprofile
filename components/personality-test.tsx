@@ -21,6 +21,7 @@ import {
   BarChart,
   Printer,
   Download,
+  HelpCircle,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -32,6 +33,13 @@ import {
   Legend,
 } from "recharts";
 import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 // import { jsPDF } from "jspdf";
 // import * as canvg from "canvg";
 // import html2canvas from "html2canvas";
@@ -109,6 +117,10 @@ export default function PersonalityTest() {
   const currentPageQuestions = interlacedQuestions[currentPage] || [];
 
   const pageProgress = ((currentPage + 1) / totalPages) * 100;
+  const questionProgress =
+    (answers.filter((answer) => answer !== 0).length /
+      (totalPages * questionsPerPage)) *
+    100;
 
   const handleOptionSelect = (questionIndex: number, value: number) => {
     const newAnswers = [...answers];
@@ -455,9 +467,9 @@ export default function PersonalityTest() {
               <span>
                 Page {currentPage + 1} of {totalPages}
               </span>
-              <span>{Math.round(pageProgress)}% Complete</span>
+              <span>{Math.round(questionProgress)}% Complete</span>
             </div>
-            <Progress value={pageProgress} className="h-2" />
+            <Progress value={questionProgress} className="h-2" />
           </div>
           {/* <div className="ml-4 flex items-center space-x-2">
               <Switch
@@ -484,7 +496,27 @@ export default function PersonalityTest() {
               <CardContent className="p-6 md:p-8">
                 <div className="mb-8">
                   <h2 className="text-xl md:text-2xl font-semibold text-center text-primary">
-                    FIT Parent Profile
+                    FIT Parent Profile{" "}
+                    <Dialog>
+                      <DialogTrigger>
+                        <HelpCircle className="h-4 w-4 inline-block align-middle cursor-help" />
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>
+                            How to take the FIT Parent Profile
+                          </DialogTitle>
+                        </DialogHeader>
+                        <p>
+                          {" "}
+                          You’ll rate yourself on 10 statements for each
+                          principle using a 1–5 scale from Strongly Disagree to
+                          Strongly Agree. This will take around 30–60 minutes.
+                          You'll get the best results if you&rsquo;re honest and
+                          don&rsquo;t overthink your answers.{" "}
+                        </p>
+                      </DialogContent>
+                    </Dialog>
                   </h2>
                   <p className="text-center text-muted-foreground mt-2">
                     Page {currentPage + 1} of {totalPages}
@@ -534,7 +566,7 @@ export default function PersonalityTest() {
                                 "flex justify-between gap-1 mb-2 text-xs text-muted-foreground transition",
                                 questionIndex === 0
                                   ? "opacity-75"
-                                  : "opacity-0 group-hover:opacity-75"
+                                  : "opacity-0 group-hover:opacity-75 delay-0 group-hover:delay-1000"
                               )}
                             >
                               <span className="w-6"></span>
@@ -577,7 +609,7 @@ export default function PersonalityTest() {
                                 "flex justify-between gap-4 mt-2 text-xs text-muted-foreground transition",
                                 questionIndex === 0
                                   ? "opacity-75"
-                                  : "opacity-0 group-hover:opacity-75"
+                                  : "opacity-0 group-hover:opacity-75 delay-0 group-hover:delay-1000"
                               )}
                             >
                               <span className="">Strong</span>
