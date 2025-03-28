@@ -290,7 +290,7 @@ function DetailedResources({
         <ul className="space-y-1 list-disc pl-5">
           {resources.statements.map((statement, index) => (
             <li key={index} className="text-sm">
-              <div className="flex gap-x-2 items-center opacity-50">
+              <div className="flex gap-x-2 justify-between items-center opacity-50">
                 {statement.statement}
                 <DotResponseIndicator
                   score={((index * 38129813 + 3) % 4) + 1}
@@ -561,7 +561,7 @@ export default function Results() {
           <CardContent className="p-6 md:p-8 space-y-6" id="printable">
             <div className="flex justify-center">
               <Image
-                src="/fit-parenting-logo.png"
+                src="/fit-parenting-logo.jpeg"
                 width={200}
                 height={200}
                 alt="FIT Parenting Logo"

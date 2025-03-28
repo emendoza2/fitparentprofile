@@ -464,6 +464,7 @@ export const interpretations: Record<string, string[]> = {
   ],
 };
 
+// TODO: update colors por dark mode
 // Colors for each principle
 export const dimensionColors = {
   "TRUTH-SEEKING": {

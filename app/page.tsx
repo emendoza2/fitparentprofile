@@ -132,7 +132,7 @@ export default function Assessment() {
           <CardContent className="p-6 md:p-8 space-y-6">
             <div className="flex justify-center">
               <Image
-                src="/fit-parenting-logo.png"
+                src="/fit-parenting-logo.jpeg"
                 width={200}
                 height={200}
                 alt="FIT Parenting Logo"

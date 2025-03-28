@@ -47,7 +47,7 @@ export default function ResearchPage() {
                 THE FIT PARENT GUIDE
               </h1>
               <p className="text-lg font-medium mt-4">
-                WELCOME to the life-long pursuit of building a healthy
+                Welcome to the life-long pursuit of building a healthy
                 relationship with your child, to raise them into a healthy
                 adult. The definition of "healthy" is a holistic one, covering
                 the domains of emotional, mental, physical, relational, and
