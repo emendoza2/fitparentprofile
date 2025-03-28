@@ -16,7 +16,7 @@ interface FootnotesContextType {
 
 interface FootnoteRefProps {
   description: React.ReactNode;
-  children: React.ReactNode;
+  children: React.ReactNode | undefined;
   id?: string;
   className?: string;
   style?: React.CSSProperties;
@@ -128,7 +128,7 @@ export const Footnotes: React.FC<FootnotesProps> = ({
 
 export const FootnotesProvider: React.FC<FootnotesProviderProps> = ({
   children,
-  footnotesTitleId = "footnotes-label",
+  footnotesTitleId = "footnote-label",
 }) => {
   const [footnotes, setFootnotes] = React.useState<Map<string, Footnote>>(
     new Map()
