@@ -364,6 +364,7 @@ function DetailedResources({
                   className="flex"
                 />
               </div>
+              {statement.action}
             </li>
           ))}
         </ul>
