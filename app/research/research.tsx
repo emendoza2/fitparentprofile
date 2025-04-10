@@ -1,41 +1,29 @@
 import "./footnotes.css";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { dimensionColors } from "@/lib/questions";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import React from "react"; // Import React if using JSX features directly
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
-import { getPrinciples } from "@/lib/principles";
-import { PrinciplesData } from "@/lib/types";
-import { FootnoteRef, FootnotesProvider } from "./footnote";
-
-import "./footnotes.css";
+import { dimensionColors } from "@/lib/questions";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, Printer } from "lucide-react";
+import Link from "next/link";
 
 // Import types for props
+import { PrinciplesData } from "@/lib/types"; // Adjust path/types as needed
+import { FootnoteRef, Footnotes, FootnotesProvider } from "./footnote";
 import { PrintButton, ResearchFootnotes } from "./client";
 
 interface ResearchClientProps {
   principles: PrinciplesData;
 }
 
-// Define a basic type for ResearchData if not already defined elsewhere
-// You might want a more specific type based on your research.json structure
-interface ResearchItem {
-  text: string;
-  citation: string;
-}
+// Accept principles and researchData as props
+export default function ResearchClient({ principles }: ResearchClientProps) {
+  // No data fetching here anymore
 
-type ResearchData = Record<string, ResearchItem[]>;
-
-export default async function ResearchPage() {
-  // Fetch data on the server
-  const principles: PrinciplesData = await getPrinciples();
-
-  // Render the client component and pass the fetched data and static data as props
   return (
+    // FootnotesProvider wraps the content that uses footnotes
     <FootnotesProvider>
       <article className="min-h-screen p-4 md:p-8 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
         <div className="max-w-4xl mx-auto">
@@ -248,6 +236,15 @@ export default async function ResearchPage() {
           <div className="h-20 print:hidden"></div>
         </div>
       </article>
-    </FootnotesProvider>
-  ); // End FootnotesProvider wrap
+    </FootnotesProvider> // End FootnotesProvider wrap
+  );
 }
+
+// Define a basic type for ResearchData if not already defined elsewhere
+// You might want a more specific type based on your research.json structure
+interface ResearchItem {
+  text: string;
+  citation: string;
+}
+
+type ResearchData = Record<string, ResearchItem[]>;

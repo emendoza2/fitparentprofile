@@ -2,14 +2,14 @@
 export const dimensions = [
   "TRUTH-SEEKING",
   "EXEMPLIFYING",
-  "EMPATHIZING",
-  "ATTENDING",
+  "COMMUNICATING",
+  "ENGAGING",
   "AFFIRMING",
   "LOVING",
   "TEACHING",
   "TRAINING",
   "PEACEMAKING",
-  "YIELDING",
+  "ENTRUSTING",
 ] as const;
 
 // 10 pages with questions for each principle
@@ -82,7 +82,7 @@ export const personalityQuestions = [
         "I model faithfulness and integrity, even when no one is watching.",
     },
   ],
-  // Page 3: EMPATHIZING
+  // Page 3: COMMUNICATING
   [
     {
       question:
@@ -121,7 +121,7 @@ export const personalityQuestions = [
         "I express empathy by trying to understand situations from my child’s perspective.",
     },
   ],
-  // Page 4: ATTENDING
+  // Page 4: ENGAGING
   [
     {
       question:
@@ -362,7 +362,7 @@ export const personalityQuestions = [
         "I help my child understand that mistakes are learning opportunities rather than failures.",
     },
   ],
-  // Page 10: YIELDING
+  // Page 10: ENTRUSTING
   [
     { question: "I actively seek God’s guidance in my parenting decisions." },
     {
@@ -414,13 +414,13 @@ export const interpretations: Record<string, string[]> = {
     "Growing: You are applying this principle well but may have areas to improve.",
     "Thriving: You are strongly living out this principle. Keep going!",
   ],
-  EMPATHIZING: [
+  COMMUNICATING: [
     "Struggling: Consider making this principle a priority.",
     "Seeking: This area needs intentional focus and development.",
     "Growing: You are applying this principle well but may have areas to improve.",
     "Thriving: You are strongly living out this principle. Keep going!",
   ],
-  ATTENDING: [
+  ENGAGING: [
     "Struggling: Consider making this principle a priority.",
     "Seeking: This area needs intentional focus and development.",
     "Growing: You are applying this principle well but may have areas to improve.",
@@ -456,7 +456,7 @@ export const interpretations: Record<string, string[]> = {
     "Growing: You are applying this principle well but may have areas to improve.",
     "Thriving: You are strongly living out this principle. Keep going!",
   ],
-  YIELDING: [
+  ENTRUSTING: [
     "Struggling: Consider making this principle a priority.",
     "Seeking: This area needs intentional focus and development.",
     "Growing: You are applying this principle well but may have areas to improve.",
@@ -487,7 +487,7 @@ export const dimensionColors = {
     fillOpacity: 0.5,
     stroke: "stroke-lime-8 dark:stroke-emerald-400",
   },
-  EMPATHIZING: {
+  COMMUNICATING: {
     color: "text-sage-9 dark:text-purple-400",
     bg: "bg-sage-9",
     bgTranslucent: "bg-sage-9/50",
@@ -497,7 +497,7 @@ export const dimensionColors = {
     fillOpacity: 0.5,
     stroke: "stroke-sage-9 dark:stroke-purple-400",
   },
-  ATTENDING: {
+  ENGAGING: {
     color: "text-orange-8 dark:text-amber-400",
     bg: "bg-orange-8",
     bgTranslucent: "bg-orange-8/50",
@@ -557,7 +557,7 @@ export const dimensionColors = {
     fillOpacity: 0.5,
     stroke: "stroke-cyan-8 dark:stroke-orange-400",
   },
-  YIELDING: {
+  ENTRUSTING: {
     color: "text-salmon-8 dark:text-cyan-400",
     bg: "bg-salmon-8",
     bgTranslucent: "bg-salmon-8/50",

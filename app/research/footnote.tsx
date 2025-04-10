@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 
 interface Footnote {
@@ -16,7 +18,7 @@ interface FootnotesContextType {
 
 interface FootnoteRefProps {
   description: React.ReactNode;
-  children: React.ReactNode | undefined;
+  children?: React.ReactNode | undefined;
   id?: string;
   className?: string;
   style?: React.CSSProperties;
@@ -185,8 +187,11 @@ function getTextFromTree(tree: React.ReactNode): string {
     text += tree;
   } else if (Array.isArray(tree)) {
     text += tree.map(getTextFromTree).join("");
-  } else if (React.isValidElement(tree) && tree.props.children) {
-    text += getTextFromTree(tree.props.children);
+  } else if (React.isValidElement(tree)) {
+    const element = tree as React.ReactElement<{ children?: React.ReactNode }>;
+    if (element.props && element.props.children) {
+      text += getTextFromTree(element.props.children);
+    }
   }
   return text;
 }

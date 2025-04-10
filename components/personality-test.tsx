@@ -1,38 +1,20 @@
 "use client";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
-  personalityQuestions,
-  dimensions,
-  interpretations,
   dimensionColors,
+  dimensions,
+  personalityQuestions,
 } from "@/lib/questions";
 import { cn } from "@/lib/utils";
-import {
-  ArrowLeft,
-  ArrowRight,
-  RefreshCcw,
-  BarChart,
-  Printer,
-  Download,
-  HelpCircle,
-} from "lucide-react";
-import {
-  ResponsiveContainer,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  Radar,
-  Tooltip,
-  Legend,
-} from "recharts";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, ArrowRight, HelpCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -40,23 +22,27 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
+import { PrinciplesData } from "@/lib/types";
 // import { jsPDF } from "jspdf";
 // import * as canvg from "canvg";
 // import html2canvas from "html2canvas";
 // import html2pdf from "html2pdf.js";
 
 // Reorganize questions to have one from each dimension on each page
-const createInterlacedQuestions = () => {
+const createInterlacedQuestions = (principlesData: PrinciplesData) => {
   const interlacedQuestions = [];
 
   // Create 10 pages with 10 questions each (one from each dimension)
   for (let pageIndex = 0; pageIndex < 10; pageIndex++) {
     const pageQuestions = [];
 
+    const dimensions = Object.keys(principlesData);
+
     // Add one question from each dimension to this page
     for (let dimensionIndex = 0; dimensionIndex < 10; dimensionIndex++) {
       // Get the question from this dimension that corresponds to the current page
-      const question = personalityQuestions[dimensionIndex][pageIndex];
+      const question =
+        principlesData[dimensions[dimensionIndex]].statements[pageIndex];
 
       // Add dimension info to the question for tracking
       pageQuestions.push({
@@ -88,12 +74,17 @@ const getDummyData = () => {
   return dummyScores;
 };
 
-export default function PersonalityTest() {
+export default function PersonalityTest({
+  principlesData,
+}: {
+  principlesData: PrinciplesData;
+}) {
   const [interlacedQuestions, setInterlacedQuestions] = useState<
     {
       dimensionIndex: number;
       questionIndex: number;
-      question: string;
+      statement: string;
+      action: string;
     }[][]
   >([]);
 
@@ -101,7 +92,7 @@ export default function PersonalityTest() {
   const [answers, setAnswers] = useState<number[]>(
     Array(personalityQuestions.flat().length).fill(0)
   );
-  const [showResults, setShowResults] = useState(false);
+  // const [showResults, setShowResults] = useState(false);
   const [direction, setDirection] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
   const [dummyData] = useState(getDummyData());
@@ -109,8 +100,8 @@ export default function PersonalityTest() {
 
   // Initialize interlaced questions on component mount
   useEffect(() => {
-    setInterlacedQuestions(createInterlacedQuestions());
-  }, []);
+    setInterlacedQuestions(createInterlacedQuestions(principlesData));
+  }, [principlesData]);
 
   const totalPages = 10;
   const questionsPerPage = 10;
@@ -161,9 +152,31 @@ export default function PersonalityTest() {
         setCurrentPage(currentPage + 1);
       }, 200);
     } else {
+      // Create a more compact representation of the data
+      const resultData = calculateDimensionScores();
+
+      // Create a more efficient data structure for URL transmission
+      const compactData = Object.fromEntries(
+        Object.entries(resultData.detailedResponses).map(
+          ([dimension, responses]) => {
+            // For each dimension, create a compact array of [questionIndex, answer]
+            return [
+              dimension,
+              [
+                resultData.scores[dimension],
+                responses.map((response) => {
+                  // Find the question index in the original questions array
+                  // const questionIndex = idx; // Use the index directly since we're already in the correct order
+                  return response.answer;
+                }),
+              ],
+            ];
+          }
+        )
+      );
+
       router.push(
-        "results?scores=" +
-          encodeURIComponent(btoa(JSON.stringify(calculateDimensionScores())))
+        "results?data=" + encodeURIComponent(btoa(JSON.stringify(compactData)))
       );
       window.scrollTo(0, 0);
     }
@@ -189,22 +202,37 @@ export default function PersonalityTest() {
 
   const calculateDimensionScores = () => {
     const scores: Record<string, number> = {};
+    const detailedResponses: Record<
+      string,
+      Array<{ question: string; answer: number }>
+    > = {};
 
     dimensions.forEach((dimension, dimensionIndex) => {
       // Calculate score for each dimension based on the 10 questions in that dimension
       let totalScore = 0;
+      const dimensionResponses: Array<{ question: string; answer: number }> =
+        [];
 
       for (let questionIndex = 0; questionIndex < 10; questionIndex++) {
         const answerIndex = dimensionIndex * 10 + questionIndex;
-        totalScore += answers[answerIndex];
+        const answer = answers[answerIndex];
+        totalScore += answer;
+
+        // Store the detailed response
+        dimensionResponses.push({
+          question:
+            personalityQuestions[dimensionIndex][questionIndex].question,
+          answer: answer,
+        });
       }
 
       // Convert to percentage (max score would be 10 questions * 5 points = 50)
       const percentageScore = Math.round((totalScore / 50) * 100);
       scores[dimension] = percentageScore;
+      detailedResponses[dimension] = dimensionResponses;
     });
 
-    return scores;
+    return { scores, detailedResponses };
   };
 
   // Function to get circle size based on position (1-5)
@@ -269,157 +297,6 @@ export default function PersonalityTest() {
     return "bg-transparent";
   };
 
-  // const downloadPDF = () => {
-  //   // const element = document.body;
-  //   // import("html2pdf.js").then((html2pdf) =>
-  //   //   html2pdf.default().from(element).save("fit-profile.pdf")
-  //   // );
-  //   var doc = new jsPDF("l", "mm", [1200, 1210]);
-
-  //   const ctx = doc.canvas.getContext("2d");
-  //   const oldDrawImage = ctx.drawImage;
-  //   ctx.drawImage = (
-  //     image,
-  //     sx,
-  //     sy,
-  //     sWidth,
-  //     sHeight,
-  //     dx,
-  //     dy,
-  //     dWidth,
-  //     dHeight
-  //   ) => {
-  //     const svgStartsWith = `data:image/svg+xml,`;
-  //     const isSvg = image.src.startsWith(svgStartsWith);
-  //     if (isSvg) {
-  //       const svgData = decodeURIComponent(image.src.split(svgStartsWith)[1]);
-  //       ctx.save();
-  //       ctx.translate(dx, dy);
-  //       v = canvg.Canvg.fromString(ctx, svgData, {
-  //         ignoreMouse: true,
-  //         ignoreAnimation: true,
-  //         ignoreDimensions: true,
-  //         ignoreClear: true,
-  //       });
-
-  //       v.start();
-  //       ctx.restore();
-  //     } else {
-  //       oldDrawImage.call(
-  //         ctx,
-  //         image,
-  //         sx,
-  //         sy,
-  //         sWidth,
-  //         sHeight,
-  //         dx,
-  //         dy,
-  //         dWidth,
-  //         dHeight
-  //       );
-  //     }
-  //     return ctx;
-  //   };
-
-  //   doc.html(document.body, {
-  //     callback: function (doc) {
-  //       doc.save();
-  //     },
-  //     x: 10,
-  //     y: 10,
-  //   });
-  // };
-
-  // Render results component
-  // const renderResults = (scores: Record<string, number>) => {
-  //   const radarData = formatScoresForRadarChart(scores);
-
-  //   return (
-  //     <motion.div
-  //       initial={{ opacity: 0, y: 20 }}
-  //       animate={{ opacity: 1, y: 0 }}
-  //       transition={{ duration: 0.5 }}
-  //     >
-  //       <Card className="border-none shadow-lg">
-  //         <CardContent className="p-6 md:p-8 space-y-6" id="printable">
-  //           <div className="text-center space-y-2">
-  //             <h2 className="text-2xl md:text-3xl font-bold">
-  //               Your FIT Parent Profile
-  //             </h2>
-  //             <p className="text-muted-foreground">
-  //               Based on your responses across 10 dimensions
-  //             </p>
-  //             <div className="flex justify-center gap-4 pt-2">
-  //               <Button onClick={printPage} variant="outline" className="gap-2">
-  //                 <Printer className="w-4 h-4" /> Print
-  //               </Button>
-  //               <Button
-  //                 onClick={downloadPDF}
-  //                 variant="outline"
-  //                 className="gap-2"
-  //               >
-  //                 <Download className="w-4 h-4" /> Save as PDF
-  //               </Button>
-  //             </div>
-  //           </div>
-
-  //           <div className="w-full h-[400px] mt-4">
-  //             <CustomRadarChart data={radarData} />
-  //           </div>
-
-  //           <div className="py-4 space-y-6">
-  //             {Object.entries(scores).map(([dimension, score]) => (
-  //               <div key={dimension} className="space-y-2">
-  //                 <div className="flex justify-between items-center">
-  //                   <h3
-  //                     className={cn(
-  //                       "font-medium flex items-center",
-  //                       dimensionColors[
-  //                         dimension as keyof typeof dimensionColors
-  //                       ].color
-  //                     )}
-  //                   >
-  //                     <span
-  //                       className={cn(
-  //                         "inline-block w-3 h-3 rounded-full mr-2",
-  //                         dimensionColors[
-  //                           dimension as keyof typeof dimensionColors
-  //                         ].bg
-  //                       )}
-  //                     ></span>
-  //                     {dimension}
-  //                   </h3>
-  //                   <span className="text-sm font-semibold">{score}%</span>
-  //                 </div>
-  //                 <Progress
-  //                   value={score}
-  //                   className="h-2"
-  //                   indicatorClassName={
-  //                     dimensionColors[dimension as keyof typeof dimensionColors]
-  //                       .bgTranslucent
-  //                   }
-  //                 />
-  //                 <p className="text-sm text-muted-foreground">
-  //                   {getScoreInterpretation(dimension, score)}
-  //                 </p>
-  //               </div>
-  //             ))}
-  //           </div>
-
-  //           <div className="pt-4">
-  //             <Button
-  //               onClick={resetTest}
-  //               className="w-full flex items-center justify-center gap-2"
-  //             >
-  //               <RefreshCcw className="h-4 w-4" /> Take the Test Again
-  //             </Button>
-  //           </div>
-  //         </CardContent>
-  //       </Card>
-  //     </motion.div>
-  //   );
-  // };
-
   // If questions haven't loaded yet, show a loading state
   if (interlacedQuestions.length === 0) {
     return (
@@ -445,9 +322,9 @@ export default function PersonalityTest() {
               checked={showPreview}
               onCheckedChange={(checked) => {
                 setShowPreview(checked);
-                if (!checked) {
-                  setShowResults(false);
-                }
+                // if (!checked) {
+                //   setShowResults(false);
+                // }
               }}
             />
             <Label htmlFor="preview-mode">Preview Results</Label>
@@ -509,7 +386,7 @@ export default function PersonalityTest() {
                         </DialogHeader>
                         <p>
                           {" "}
-                          You’ll rate yourself on 10 statements for each
+                          You'll rate yourself on 10 statements for each
                           principle using a 1–5 scale from Strongly Disagree to
                           Strongly Agree. You'll get the best results if
                           you&rsquo;re honest and don&rsquo;t overthink your
@@ -543,7 +420,7 @@ export default function PersonalityTest() {
                       >
                         <div className="flex items-center">
                           <h3 className="text-base md:text-lg font-medium">
-                            {question.question}
+                            {question.statement}
                             {false && (
                               <Badge
                                 variant="outline"
@@ -584,23 +461,37 @@ export default function PersonalityTest() {
                                 "Agree",
                                 "Strongly agree",
                               ].map((title, index) => (
-                                <button
+                                <label
                                   key={index + 1}
                                   title={title}
-                                  onClick={() =>
-                                    handleOptionSelect(questionIndex, index + 1)
-                                  }
                                   className={cn(
-                                    "rounded-full transition-all duration-200 border-2",
+                                    "rounded-full transition-all duration-200 border-2 cursor-pointer",
                                     getCircleSize(index + 1),
-                                    dimensionColor.border, //getCircleBorderColor(value),
+                                    dimensionColor.border,
                                     getAnswerForQuestion(questionIndex) ===
                                       index + 1
                                       ? dimensionColor.bgTranslucent
-                                      : "bg-transparent" //getSelectedStyle(questionIndex, value),
+                                      : "bg-transparent"
                                   )}
                                   aria-label={`Rating ${index + 1}`}
-                                />
+                                >
+                                  <input
+                                    type="radio"
+                                    name={`question-${questionIndex}`}
+                                    value={index + 1}
+                                    checked={
+                                      getAnswerForQuestion(questionIndex) ===
+                                      index + 1
+                                    }
+                                    onChange={() =>
+                                      handleOptionSelect(
+                                        questionIndex,
+                                        index + 1
+                                      )
+                                    }
+                                    className="sr-only"
+                                  />
+                                </label>
                               ))}
                             </div>
 

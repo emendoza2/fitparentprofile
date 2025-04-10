@@ -64,7 +64,7 @@ export const fitParentResources = {
             "<a href='https://www.youtube.com/watch?v=YwEwbtG6Xy4' target='_blank' class='text-blue-600 hover:underline'>Motivate Family Series – Modeling (YouTube)</a>: A series demonstrating practical ways to model good values."
         ]
     },
-    "EMPATHIZING": {
+    "COMMUNICATING": {
         dailyActions: [
             "Practice a 'two-minute rule' allowing your child uninterrupted speaking time.",
             "Use phrases like 'I see you're upset' or 'I understand this is hard for you' before offering guidance.",
@@ -93,7 +93,7 @@ export const fitParentResources = {
             "<a href='https://www.youtube.com/watch?v=1Evwgu369Jw' target='_blank' class='text-blue-600 hover:underline'>Empathy Short Video by Brené Brown (YouTube)</a>: (Free) A brief video that illustrates the power of empathy."
         ]
     },
-    "ATTENDING": {
+    "ENGAGING": {
         dailyActions: [
             "Turn off electronics and invite each family member to share a highlight of their day.",
             "Spend at least 15 minutes doing something your child loves.",
@@ -279,7 +279,7 @@ export const fitParentResources = {
             "Videos – Conflict Resolution for Kids: (Free on YouTube) A collection of short, child-friendly lessons."
         ]
     },
-    "YIELDING": {
+    "ENTRUSTING": {
         dailyActions: [
             "Begin each day with a prayer: \"Lord, guide me in how I parent today.\"",
             "During your devotional time, lift up your child's name and specific needs before God.",

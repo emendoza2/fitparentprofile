@@ -1,10 +1,13 @@
-import PersonalityTest from "@/components/personality-test"
+import { getPrinciples } from "@/lib/principles";
+import PersonalityTest from "@/components/personality-test";
 
-export default function Home() {
+export default async function AssessmentPage() {
+  // Fetch principles data on the server
+  const principlesData = await getPrinciples();
+
   return (
-    <main className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <PersonalityTest />
+    <main className="container mx-auto py-8 px-4">
+      <PersonalityTest principlesData={principlesData} />
     </main>
-  )
+  );
 }
-
