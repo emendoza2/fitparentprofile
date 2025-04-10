@@ -23,7 +23,7 @@ export async function getPrinciples(): Promise<PrinciplesData> {
         scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
 
-    const sheets = google.sheets({ version: 'v4', auth });
+    const sheets = google.sheets({ version: 'v4', auth, fetchImplementation: (init, options) => fetch(init, { ...options, cache: 'force-cache' }) });
     const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID; // Get from environment variable
 
     // Define the named ranges to fetch

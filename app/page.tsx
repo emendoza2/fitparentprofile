@@ -1,5 +1,3 @@
-"use server";
-
 import { Card, CardContent } from "@/components/ui/card";
 import { getPrinciples } from "@/lib/principles";
 import Image from "next/image";
