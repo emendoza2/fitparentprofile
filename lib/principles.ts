@@ -151,6 +151,15 @@ function processSheetData(category: string, rows: any[][]): Record<string, any[]
                     const dimension = rowObj.dimension;
                     if (!result[dimension]) result[dimension] = [];
 
+                    const defaultLevels = [
+                        '[NA]',
+                        'Struggling: Consider making this principle a priority.',
+                        'Seeking: This area needs intentional focus and development.',
+                        'Growing: You are applying this principle well but may have areas to improve.',
+                        'Thriving: You are strongly living out this principle. Keep going!',
+                        '[NA]'
+                    ];
+
                     result[dimension].push({
                         why: rowObj.why,
                         description: rowObj.description,
@@ -158,7 +167,7 @@ function processSheetData(category: string, rows: any[][]): Record<string, any[]
                             title: rowObj.welcome_title,
                             description: rowObj.welcome_descriptionrowObj
                         },
-                        levels: rowObj.levels
+                        levels: row.slice(5, 11).map((level, index) => level || defaultLevels[index])
                     });
                 }
             });
