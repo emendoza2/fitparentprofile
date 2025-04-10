@@ -10,6 +10,9 @@
     "test:sheets": "bun test-principles.js",
     "test:sheets:ts": "bun run test-principles.ts"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
     "@hookform/resolvers": "^3.9.1",
