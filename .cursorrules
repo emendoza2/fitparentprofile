@@ -1,0 +1,4 @@
+use snake-case for file and folder names, including components. the .tsx at the end is enough to signify what kind of file it is.
+use SOLID design principles for your code
+work with libraries and not against them, being idiomatic to the language and framework you are using
+eslint takes care of ensuring code style is consistent

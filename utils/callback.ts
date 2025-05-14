@@ -1,0 +1,21 @@
+import { NextRouter } from "next/router";
+
+/** Redirects to signup (or any path) and tucks the current path into ?callback= */
+export function redirectWithReturnTo(router: NextRouter, target = "/signup") {
+  const callback = router.asPath;
+  router.replace({
+    pathname: target,
+    query: { callback },
+  });
+}
+
+/** After auth, reads ?callback and sends user back (or to default) */
+export function goBackOr(router: NextRouter, fallback = "/") {
+  const raw = router.query.callback;
+  const dest = Array.isArray(raw) ? raw[0] : raw || fallback;
+  router.replace(dest);
+}
+
+export function addCallback(path: string, callback: string) {
+  return `${path}?callback=${encodeURIComponent(callback)}`;
+}

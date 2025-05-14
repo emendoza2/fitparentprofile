@@ -21,6 +21,7 @@ export default async function Welcome() {
                 width={200}
                 height={200}
                 alt="FIT Parenting Logo"
+                priority
               />
             </div>
             <div className="text-center space-y-4">

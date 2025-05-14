@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "@/styles/globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import { ToastProvider } from "@/components/ui/toast";
+// import { ToastProvider } from "@/components/ui/toast";
 import { Figtree } from "next/font/google";
+import Providers from "./query-providers";
 
 export const metadata: Metadata = {
   title: "FIT Parent Profile",
@@ -23,7 +24,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={figtree.className}>
-        <main>{children}</main>
+        <Providers>
+          <main>{children}</main>
+        </Providers>
         <Toaster />
       </body>
     </html>

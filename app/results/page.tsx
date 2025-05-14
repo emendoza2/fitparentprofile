@@ -5,11 +5,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { Toaster } from "@/components/ui/sonner";
 import ResultsClient from "@/components/results-client";
+import { createClient } from "@/utils/supabase/server";
 
 // Server component
 export default async function Results() {
   // Fetch principles data on the server
   const principlesData = await getPrinciples();
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
@@ -22,6 +28,7 @@ export default async function Results() {
                 width={200}
                 height={200}
                 alt="FIT Parenting Logo"
+                priority
               />
             </div>
             <div className="text-center space-y-2">
@@ -34,7 +41,7 @@ export default async function Results() {
             </div>
 
             <Suspense fallback={<div>Loading results...</div>}>
-              <ResultsClient principlesData={principlesData} />
+              <ResultsClient principlesData={principlesData} user={user} />
             </Suspense>
 
             <p className="mb-2 text-center">
