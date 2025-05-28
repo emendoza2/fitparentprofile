@@ -1,8 +1,22 @@
 import { PrinciplesData } from "@/lib/types";
 import { mapObjectValues } from "@/lib/utils";
 
-function shuffleArray<T>(array: T[]): T[] {
-  return array.sort(() => Math.random() - 0.5);
+function splitmix32(a: number) {
+  return function () {
+    a |= 0;
+    a = (a + 0x9e3779b9) | 0;
+    let t = a ^ (a >>> 16);
+    t = Math.imul(t, 0x21f0aaad);
+    t = t ^ (t >>> 15);
+    t = Math.imul(t, 0x735a2d97);
+    return ((t = t ^ (t >>> 15)) >>> 0) / 4294967296;
+  };
+}
+
+const globalPrng = splitmix32(((Math.E / Math.PI) * 2 ** 32) >>> 0);
+
+function shuffleArray<T>(array: T[], prng: () => number = globalPrng): T[] {
+  return array.sort(() => prng() - 0.5);
 }
 
 // Reorganize questions to have one from each dimension on each page
@@ -16,6 +30,7 @@ export const createInterlacedQuestions = (
 ) => {
   console.log("interlaced qustions", totalPages, questionsPerPage);
   const interlacedQuestions = [];
+  const prng = splitmix32(((Math.E / Math.PI) * 2 ** 32) >>> 0);
 
   // Shuffle questions into one long array
   const shuffledQuestionsByDimension = mapObjectValues(
@@ -27,7 +42,8 @@ export const createInterlacedQuestions = (
           ...statement,
           dimension,
           questionIndex: index,
-        }))
+        })),
+        prng
       )
   );
 
@@ -40,7 +56,8 @@ export const createInterlacedQuestions = (
       return shuffleArray(
         Object.values(shuffledQuestionsByDimension).map(
           (questions) => questions[index]
-        )
+        ),
+        prng
       ); // abc+bca+cba, etc
     });
 
@@ -61,7 +78,7 @@ export const createInterlacedQuestions = (
     }
 
     // Shuffle the questions on this page
-    const shuffledPageQuestions = shuffleArray([...pageQuestions]);
+    const shuffledPageQuestions = shuffleArray([...pageQuestions], prng);
     interlacedQuestions.push(shuffledPageQuestions);
   }
 
