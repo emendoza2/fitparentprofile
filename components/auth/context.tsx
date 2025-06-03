@@ -13,6 +13,7 @@ import { createClient } from "@/utils/supabase/client";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  signOut: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -31,6 +32,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const supabase = createClient();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    setUser(null);
+  }
 
   useEffect(() => {
     // Get initial user
@@ -53,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase]);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );

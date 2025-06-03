@@ -15,6 +15,7 @@ import {
   getDimensionScores,
 } from "@/utils/assessment/get-dimension-scores";
 import { useRouter } from "next/navigation";
+import ProfileDropdown from "@/components/ui/profile-dropdown";
 
 export default function Results() {
   const { user, loading } = useAuth();
@@ -44,7 +45,12 @@ export default function Results() {
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
-      <div className="w-full max-w-4xl mx-auto">
+      <div className="w-full max-w-4xl mx-auto relative">
+        {user && (
+          <div className="absolute top-4 right-4 z-10">
+            <ProfileDropdown />
+          </div>
+        )}
         <Card className="border-none shadow-lg">
           <CardContent className="p-6 md:p-8 space-y-6" id="printable">
             <div className="flex justify-center">

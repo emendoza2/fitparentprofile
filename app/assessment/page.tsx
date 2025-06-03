@@ -1,22 +1,15 @@
-import { useQuestions } from "@/lib/use-assessment-sheets";
-import { getTest, useTest } from "./getTest";
+"use client";
+
+import { getQuestions } from "@/lib/sheets-api";
 import { PersonalityTest } from "@/components/personality-test";
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
-import { getQuestions } from "@/lib/sheets-api";
 
-async function AssessmentPage() {
-  // if (isLoading || !testData) {
-  //   return <main className="container mx-auto py-8 px-4">Loading...</main>;
-  // }
+export default async function AssessmentPage() {
   const queryClient = new QueryClient();
-  // await queryClient.prefetchQuery({
-  //   queryKey: ["test"],
-  //   queryFn: getTest,
-  // });
   await queryClient.prefetchQuery({
     queryKey: ["questions"],
     queryFn: getQuestions,
@@ -25,15 +18,8 @@ async function AssessmentPage() {
   return (
     <main className="container mx-auto py-8 px-4">
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <PersonalityTest
-        // questions={questions}
-        // interlacedQuestions={testData.interlacedQuestions}
-        // totalPages={testData.totalPages}
-        // questionsPerPage={testData.questionsPerPage}
-        />
+        <PersonalityTest />
       </HydrationBoundary>
     </main>
   );
 }
-
-export default AssessmentPage;

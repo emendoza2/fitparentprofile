@@ -21,6 +21,9 @@ import { z } from "zod";
 import { QuestionSchema } from "@/lib/sheets-api";
 import { useTest } from "@/app/assessment/getTest";
 import { useAuth } from "./auth/context";
+import { toast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
+import ProfileDropdown from "@/components/ui/profile-dropdown";
 
 // Sample data for preview
 const getDummyData = () => {
@@ -127,25 +130,50 @@ export function PersonalityTest({}: // principlesData,
 }) {
   const { user, loading } = useAuth();
   const isLoggedIn = !!user;
+  const router = useRouter();
 
   const { data: testData, isLoading } = useTest();
   const { data: questions } = useQuestions();
 
-  const router = useRouter();
-  // const calculateCompactAnswers = useStore(
-  //   personalityTestStore,
-  //   (state) => state.calculateCompactAnswers
-  // );
-  // const handleSubmit = () => {
-  //   const compactData = getDimensionScores()
+  const { data: assessment, reset } = useAssessment(user?.id);
+  const [showRetakePrompt, setShowRetakePrompt] = useState(false);
+  const [allowRetake, setAllowRetake] = useState(false);
 
-  //   router.push(
-  //     "results?data=" + encodeURIComponent(btoa(JSON.stringify(compactData)))
-  //   );
-  //   window.scrollTo(0, 0);
-  // };
+  // Redirect to signup if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      const callback = encodeURIComponent("/assessment");
+      router.replace(`/signup?callback=${callback}`);
+    }
+  }, [user, loading, router]);
 
-  const { data: assessment } = useAssessment();
+  useEffect(() => {
+    if (
+      isLoggedIn &&
+      assessment &&
+      Object.keys(assessment.answers || {}).length > 0 &&
+      !allowRetake
+    ) {
+      toast({
+        title: "Test Already Exists",
+        description:
+          "You already have test results. Would you like to retake the test?",
+        action: (
+          <button
+            className="ml-4 px-3 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90"
+            onClick={() => {
+              reset();
+              setAllowRetake(true);
+              toast({ title: "You can now retake the test." });
+            }}
+          >
+            Retake
+          </button>
+        ),
+      });
+      setShowRetakePrompt(true);
+    }
+  }, [isLoggedIn, assessment, allowRetake, reset]);
 
   const handleSubmit = () => {
     const compactData = getDimensionScores(assessment?.answers, questions);
@@ -160,18 +188,38 @@ export function PersonalityTest({}: // principlesData,
     window.scrollTo(0, 0);
   };
 
-  if (isLoading || !testData) {
+  if (loading || !isLoggedIn) {
     return <main className="container mx-auto py-8 px-4">Loading...</main>;
+  }
+
+  if (showRetakePrompt && !allowRetake) {
+    return (
+      <main className="container mx-auto py-8 px-4">
+        <div>
+          You already have test results. Check your{" "}
+          <a href="/results" className="underline text-sky-11">
+            results
+          </a>{" "}
+          or <span className="font-semibold">retake</span> from the notice
+          above.
+        </div>
+      </main>
+    );
   }
 
   const { interlacedQuestions, totalPages, questionsPerPage } = testData ?? {};
 
   return (
-    <PersonalityTestInner
-      questionPages={interlacedQuestions}
-      totalPages={totalPages}
-      questionsPerPage={questionsPerPage}
-      onSubmit={handleSubmit}
-    />
+    <div className="w-full max-w-4xl mx-auto relative">
+      <div className="absolute top-4 right-4 z-10">
+        <ProfileDropdown />
+      </div>
+      <PersonalityTestInner
+        questionPages={interlacedQuestions}
+        totalPages={totalPages}
+        questionsPerPage={questionsPerPage}
+        onSubmit={handleSubmit}
+      />
+    </div>
   );
 }
