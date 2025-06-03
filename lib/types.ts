@@ -1,3 +1,6 @@
+import { z } from "zod";
+import { QuestionSchema } from "./sheets-api";
+
 // Define types for our data structures
 export interface ResearchItem {
   text: string;
@@ -33,7 +36,7 @@ export interface PrincipleData {
   research: ResearchItem[];
   resources: ResourceItem[];
   Scripture: ScriptureItem[];
-  statements: StatementItem[];
+  statements: z.infer<typeof QuestionSchema>[];
   why: string;
   description: string;
   welcome: {

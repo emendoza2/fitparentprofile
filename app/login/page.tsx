@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useTransition } from "react";
+import { Suspense, useEffect, useTransition, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { z } from "zod";
@@ -25,26 +25,79 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { login } from "./actions";
+import { useLogin } from "@/hooks/use-login";
 import { loginSchema } from "./login-schema";
 import { EMPTY_FORM_STATE } from "@/utils/to-form-state";
 import { useToastMessage } from "@/hooks/use-toast-message";
 import { ShowHidePasswordInput } from "@/components/molecules/show-hide-password-input";
-import { useFormStatus } from "react-dom";
 import { signupDetailsStore } from "@/lib/store/signup-details-store";
+import { FaGoogle, FaFacebook, FaApple } from "react-icons/fa";
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
-  const [state, formAction] = useActionState(login, EMPTY_FORM_STATE);
+function SocialLoginButtons({
+  onProvider,
+  loading,
+}: {
+  onProvider: (provider: "google" | "facebook" | "apple") => void;
+  loading: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-2 mb-4">
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={() => onProvider("google")}
+        disabled={loading}
+      >
+        <FaGoogle className="h-5 w-5 mr-2" />
+        Continue with Google
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={() => onProvider("facebook")}
+        disabled={loading}
+      >
+        <FaFacebook className="h-5 w-5 mr-2" />
+        Continue with Facebook
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={() => onProvider("apple")}
+        disabled={loading}
+      >
+        <FaApple className="h-5 w-5 mr-2" />
+        Continue with Apple
+      </Button>
+    </div>
+  );
+}
 
-  // const { pending } = useFormStatus();
+function LoginPageInner() {
+  const {
+    loginWithMagicLink,
+    loginWithPassword,
+    loginWithProvider,
+    loading,
+    error,
+    setError,
+  } = useLogin();
+  const [showPassword, setShowPassword] = useState(false);
   const searchParams = useSearchParams();
   const callback = searchParams.get("callback");
 
-  const [pending, startTransition] = useTransition();
+  // Magic link form
+  const magicForm = useForm<{ email: string }>({
+    defaultValues: { email: "" },
+  });
 
-  const form = useForm<LoginFormValues>({
+  // Password form
+  const passwordForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -52,14 +105,6 @@ export default function LoginPage() {
       callback,
     },
   });
-  console.log(
-    "pending",
-    pending,
-    form.formState.isLoading,
-    form.formState.isSubmitting
-  );
-
-  const noScriptFallback = useToastMessage(state);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
@@ -87,94 +132,166 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Form {...form}>
-              <form
-                action={formAction}
-                onSubmit={(e) => {
-                  form.trigger().then((isValid) => {
-                    if (isValid) {
-                      startTransition(() => {
-                        (e.target as HTMLFormElement).requestSubmit();
-                      });
-                      signupDetailsStore.getState().clearSignupDetails();
-                    } else {
-                      e.preventDefault();
-                    }
-                  });
-                }}
-                className="space-y-6"
-              >
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="you@example.com"
-                          autoFocus
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <ShowHidePasswordInput
-                          placeholder="Enter your password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <input type="hidden" {...form.register("callback")} />
-
-                {noScriptFallback}
-
-                <div className="flex justify-end">
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm text-blue-600 hover:underline"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={pending || form.formState.isSubmitting}
+            <SocialLoginButtons
+              onProvider={(provider) => loginWithProvider(provider, callback)}
+              loading={loading}
+            />
+            <div className="relative flex items-center my-4">
+              <div className="flex-grow border-t border-gray-200 dark:border-gray-700" />
+              <span className="mx-2 text-xs text-gray-400">or</span>
+              <div className="flex-grow border-t border-gray-200 dark:border-gray-700" />
+            </div>
+            {!showPassword ? (
+              <Form {...magicForm}>
+                <form
+                  onSubmit={magicForm.handleSubmit(async ({ email }) => {
+                    setError(null);
+                    await loginWithMagicLink(email, callback);
+                  })}
+                  className="space-y-6"
                 >
-                  {pending || form.formState.isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Logging in...
-                    </>
-                  ) : (
-                    "Log In"
+                  <FormField
+                    control={magicForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="you@example.com"
+                            autoFocus
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {error && (
+                    <div className="text-red-600 text-sm text-center">
+                      {error}
+                    </div>
                   )}
-                </Button>
-              </form>
-            </Form>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={loading || magicForm.formState.isSubmitting}
+                  >
+                    {loading || magicForm.formState.isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending magic link...
+                      </>
+                    ) : (
+                      "Send Magic Link"
+                    )}
+                  </Button>
+                  <div className="flex justify-center">
+                    <button
+                      type="button"
+                      className="text-xs text-blue-600 hover:underline mt-2"
+                      onClick={() => setShowPassword(true)}
+                    >
+                      Use password instead
+                    </button>
+                  </div>
+                </form>
+              </Form>
+            ) : (
+              <Form {...passwordForm}>
+                <form
+                  onSubmit={passwordForm.handleSubmit(async (values) => {
+                    setError(null);
+                    await loginWithPassword(values);
+                    signupDetailsStore.getState().clearSignupDetails();
+                  })}
+                  className="space-y-6"
+                >
+                  <FormField
+                    control={passwordForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="you@example.com"
+                            autoFocus
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={passwordForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <ShowHidePasswordInput
+                            placeholder="Enter your password"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <input type="hidden" {...passwordForm.register("callback")} />
+                  {error && (
+                    <div className="text-red-600 text-sm text-center">
+                      {error}
+                    </div>
+                  )}
+                  <div className="flex justify-end">
+                    <Link
+                      href="/forgot-password"
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={loading || passwordForm.formState.isSubmitting}
+                  >
+                    {loading || passwordForm.formState.isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Logging in...
+                      </>
+                    ) : (
+                      "Log In"
+                    )}
+                  </Button>
+                  <div className="flex justify-center">
+                    <button
+                      type="button"
+                      className="text-xs text-blue-600 hover:underline mt-2"
+                      onClick={() => setShowPassword(false)}
+                    >
+                      Use magic link instead
+                    </button>
+                  </div>
+                </form>
+              </Form>
+            )}
           </CardContent>
           <CardFooter className="flex justify-center">
             <p className="text-sm text-muted-foreground">
               Don't have an account?{" "}
               <Link
-                href="/signup"
+                href={
+                  callback
+                    ? `/signup?callback=${encodeURIComponent(callback)}`
+                    : "/signup"
+                }
                 className="text-blue-600 hover:underline font-medium"
               >
                 Sign up
@@ -184,5 +301,13 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageInner />
+    </Suspense>
   );
 }

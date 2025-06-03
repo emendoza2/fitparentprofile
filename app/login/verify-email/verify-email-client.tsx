@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { Suspense, useActionState, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,7 +32,7 @@ const changeEmailSchema = z.object({
   newEmail: z.string().email(),
 });
 
-export default function VerifyEmailClient() {
+function VerifyEmailClientInner() {
   const router = useRouter();
   const email = useSearchParams().get("email") || "";
   const [isResending, setIsResending] = useState(false);
@@ -129,5 +129,13 @@ export default function VerifyEmailClient() {
         </div>
       </CardFooter>
     </>
+  );
+}
+
+export default function VerifyEmailClient() {
+  return (
+    <Suspense>
+      <VerifyEmailClientInner />
+    </Suspense>
   );
 }

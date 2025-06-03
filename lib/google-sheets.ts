@@ -3,7 +3,8 @@ import { z } from "zod";
 
 export async function fetchDataFromCSVUrl<Schema extends z.ZodTypeAny>(
   url: string,
-  schema: Schema
+  schema: Schema,
+  transform: (records: unknown[]) => unknown[] = (records) => records
 ): Promise<z.infer<Schema>[]> {
   const response = await fetch(url);
   const csvText = await response.text();
@@ -14,7 +15,7 @@ export async function fetchDataFromCSVUrl<Schema extends z.ZodTypeAny>(
     delimiter: ",",
   });
 
-  const parsedRecords = z.array(schema).parse(records);
+  const parsedRecords = z.array(schema).parse(transform(records));
 
   return parsedRecords;
 }

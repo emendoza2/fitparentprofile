@@ -17,9 +17,63 @@ import { addCallback } from "@/utils/callback";
 import { useMemo, useRef } from "react";
 import { personalityTestStore } from "@/lib/store/personality-test-store";
 import { useStore } from "zustand";
+import { z } from "zod";
+import { QuestionSchema } from "@/lib/sheets-api";
+import { DimensionScores } from "@/utils/assessment/get-dimension-scores";
+import Image from "next/image";
+import QRCode from "react-qr-code";
+
+function AppDownloadBanner() {
+  return (
+    <Card className="flex flex-row items-start">
+      <div>
+        <CardHeader>
+          <div className="flex items-center gap-4">
+            <div className="rounded-2xl overflow-hidden">
+              <Image src="/appIcon.svg" alt="App Icon" width={48} height={48} />
+            </div>
+            <div>
+              <CardTitle>Get the Full Experience</CardTitle>
+              <CardDescription>
+                Download our app to view your complete personality profile and
+                track your growth over time.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex gap-2 items-center">
+              <Link href="#" className="h-10">
+                <Image
+                  src="/app-store-dl.svg"
+                  alt="Download on the App Store"
+                  width={120}
+                  height={40}
+                  className="h-full w-auto"
+                />
+              </Link>
+              <Link href="#" className="h-10">
+                <Image
+                  src="/google-play-dl.svg"
+                  alt="Get it on Google Play"
+                  width={135}
+                  height={40}
+                  className="h-full w-auto"
+                />
+              </Link>
+            </div>
+          </div>
+        </CardContent>
+      </div>
+      <div className="mr-6 mt-6 bg-white p-2 rounded-lg shadow border">
+        <QRCode value="/store-redirect" size={86} />
+      </div>
+    </Card>
+  );
+}
 
 function LoggedOutBanner() {
-  // Should prompt them to create an account to save their results and view the full results
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const callback = pathname + "?" + searchParams.toString();
@@ -51,40 +105,29 @@ function LoggedOutBanner() {
 }
 
 export function ResultSheet({
-  principlesData,
+  data,
   isLoggedIn,
 }: {
-  principlesData: PrinciplesData;
+  data: DimensionScores;
   isLoggedIn: boolean;
 }) {
   const dataParam = useSearchParams().get("data");
-  const store = useStore(personalityTestStore);
-  const dataStore = useMemo(
-    () => store.calculateCompactAnswers({ principlesData }),
-    [store.answers]
-  );
-  const data = dataParam
-    ? (JSON.parse(atob(dataParam)) as {
-        [dimension: string]: [score: number, responses: number[]];
-      })
-    : dataStore;
+  data = dataParam ? (JSON.parse(atob(dataParam)) as DimensionScores) : data;
 
   return (
     <>
       <ScoreSummary data={data} />
       <RadarChartSection data={data} />
-      {isLoggedIn ? (
-        <DimensionSummaryList data={data} principlesData={principlesData} />
-      ) : (
-        <div className="relative">
-          <DimensionSummaryList data={data} principlesData={principlesData} />
-          <div className="fade-bottom-overlay pointer-events-none absolute left-0 right-0 bottom-0 h-16" />
-        </div>
+      <div className="relative max-h-[500px] overflow-y-hidden">
+        <DimensionSummaryList data={data} />
+        <div className="fade-bottom-overlay pointer-events-none absolute left-0 right-0 bottom-0 h-48" />
+      </div>
+      <AppDownloadBanner />
+      {!isLoggedIn && (
+        <>
+          <LoggedOutBanner />
+        </>
       )}
-      {isLoggedIn && (
-        <DetailedResponsesSection data={data} principlesData={principlesData} />
-      )}
-      {!isLoggedIn && <LoggedOutBanner />}
     </>
   );
 }

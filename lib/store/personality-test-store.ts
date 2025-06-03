@@ -4,6 +4,7 @@ import { PrinciplesData, StatementItem } from "@/lib/types";
 import { dimensions, personalityQuestions } from "@/lib/questions";
 import { mapObjectValues } from "../utils";
 import { produce } from "immer";
+import { DimensionScores } from "@/utils/assessment/get-dimension-scores";
 
 export interface Question extends StatementItem {
   // dimensionIndex: number;
@@ -69,7 +70,7 @@ export interface PersonalityTestState {
   };
   calculateCompactAnswers: (props: {
     principlesData: PrinciplesData;
-  }) => Record<string, [number, number[]]>;
+  }) => DimensionScores;
 }
 
 export function createPersonalityTestStore(

@@ -4,7 +4,12 @@ import { z } from "zod";
 
 export const signUpSchema = z
   .object({
-    name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+    first_name: z
+      .string()
+      .min(2, { message: "First name must be at least 2 characters" }),
+    last_name: z
+      .string()
+      .min(2, { message: "Last name must be at least 2 characters" }),
     email: z.string().email({ message: "Please enter a valid email address" }),
     password: z
       .string()

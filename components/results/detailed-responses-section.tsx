@@ -4,6 +4,19 @@ import { cn } from "@/lib/utils";
 import { dimensionColors } from "@/lib/questions";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, BookOpen, CheckCircle2, ExternalLink } from "lucide-react";
+import { DimensionScores } from "@/utils/assessment/get-dimension-scores";
+import { getScoreInterpretation } from "@/utils/assessment/get-score-interpretation";
+import {
+  useDimensionResearchScripture,
+  useDimensions,
+  useQuestions,
+} from "@/lib/use-assessment-sheets";
+import { z } from "zod";
+import {
+  QuestionSchema,
+  ResourceSchema,
+  ScriptureSchema,
+} from "@/lib/sheets-api";
 
 function DotResponseIndicator({
   score,
@@ -32,15 +45,21 @@ function DotResponseIndicator({
 function DetailedResources({
   dimension,
   responses,
-  principle,
-}: {
+  questions,
+  Scripture,
+  resources,
+}: // principle,
+{
   dimension: keyof typeof dimensionColors;
   responses: number[];
-  principle: PrincipleData;
+  questions: z.infer<typeof QuestionSchema>[];
+  Scripture: z.infer<typeof ScriptureSchema>[];
+  resources: z.infer<typeof ResourceSchema>[];
+  // principle: PrincipleData;
 }) {
-  console.log("principle", principle);
-  const resources = principle.resources;
-  if (!resources) return null;
+  // console.log("principle", principle);
+  // const resources = principle.resources;
+  // if (!resources) return null;
 
   return (
     <div className="mt-6 space-y-6 print:mt-4 print:space-y-4">
@@ -56,7 +75,7 @@ function DetailedResources({
           Act on It
         </h4>
         <ul className="space-y-1 list-disc pl-5">
-          {principle.statements.map((statement, index) => (
+          {questions.map((statement, index) => (
             <li key={index} className="text-sm">
               <div className="flex gap-x-2 justify-between items-center opacity-50">
                 {statement.statement}
@@ -66,7 +85,7 @@ function DetailedResources({
                   className="flex"
                 />
               </div>
-              {statement.challenge}
+              {/* {statement.challenge} */}
             </li>
           ))}
         </ul>
@@ -84,7 +103,7 @@ function DetailedResources({
           Bible Verses
         </h4>
         <ul className="space-y-1 list-disc pl-5">
-          {principle.Scripture.map((verse, index) => (
+          {Scripture.map((verse, index) => (
             <li key={index} className="text-sm">
               <a
                 href={
@@ -179,30 +198,20 @@ function DetailedResources({
   );
 }
 
-function getScoreInterpretation(
-  dimension: string,
-  score: number,
-  principlesData: PrinciplesData
-) {
-  const levels = principlesData[dimension]?.levels || [];
-  if (score < 25) {
-    return levels[1] || "Needs immediate attention.";
-  } else if (score < 50) {
-    return levels[2] || "Needs growth.";
-  } else if (score < 75) {
-    return levels[3] || "Good.";
-  } else {
-    return levels[4] || "Excellent.";
-  }
-}
-
 export function DetailedResponsesSection({
   data,
-  principlesData,
-}: {
-  data: Record<string, [number, number[]]>;
+}: // principlesData,
+{
+  data: DimensionScores;
   principlesData: PrinciplesData;
 }) {
+  const { data: dimensions } = useDimensions();
+  const dimensionMap =
+    dimensions && Object.fromEntries(dimensions.map((d) => [d.dimension, d]));
+
+  const { data: questions } = useQuestions();
+  const { dimensionData } = useDimensionResearchScripture();
+
   return (
     <div className="py-4 space-y-6 border-t">
       <h3 className="text-lg font-semibold">Detailed Responses</h3>
@@ -232,14 +241,21 @@ export function DetailedResponsesSection({
               className="h-2"
               indicatorClassName={dimensionColors[colorKey].bgTranslucent}
             />
-            <p className="text-sm text-muted-foreground">
-              {getScoreInterpretation(dimension, score, principlesData)}
-            </p>
-            <DetailedResources
-              dimension={colorKey}
-              responses={responses}
-              principle={principlesData[dimension]}
-            />
+            {dimensionMap && (
+              <p className="text-sm text-muted-foreground">
+                {getScoreInterpretation(dimension, score, dimensionMap)}
+              </p>
+            )}
+            {dimensionData && questions && (
+              <DetailedResources
+                dimension={colorKey}
+                responses={responses}
+                Scripture={dimensionData?.[dimension]?.scripture}
+                resources={dimensionData?.[dimension]?.research}
+                questions={questions?.filter((q) => q.dimension === dimension)}
+                // principle={principlesData[dimension]}
+              />
+            )}
             <hr className="mt-6 print:mt-4" />
           </div>
         );

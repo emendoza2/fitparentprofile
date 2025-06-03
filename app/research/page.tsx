@@ -1,5 +1,7 @@
-import "./footnotes.css";
+"use client";
 
+import "./footnotes.css";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { dimensionColors } from "@/lib/questions";
@@ -7,34 +9,22 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
 import { getPrinciples } from "@/lib/principles";
 import { PrinciplesData } from "@/lib/types";
 import { FootnoteRef, FootnotesProvider } from "./footnote";
-
-import "./footnotes.css";
-
-// Import types for props
 import { PrintButton, ResearchFootnotes } from "./client";
 
-interface ResearchClientProps {
-  principles: PrinciplesData;
-}
+export default function ResearchPage() {
+  const [principles, setPrinciples] = useState<PrinciplesData | null>(null);
 
-// Define a basic type for ResearchData if not already defined elsewhere
-// You might want a more specific type based on your research.json structure
-interface ResearchItem {
-  text: string;
-  citation: string;
-}
+  useEffect(() => {
+    getPrinciples().then(setPrinciples);
+  }, []);
 
-type ResearchData = Record<string, ResearchItem[]>;
+  if (!principles) {
+    return <main className="min-h-screen p-4 md:p-8">Loading...</main>;
+  }
 
-export default async function ResearchPage() {
-  // Fetch data on the server
-  const principles: PrinciplesData = await getPrinciples();
-
-  // Render the client component and pass the fetched data and static data as props
   return (
     <FootnotesProvider>
       <article className="min-h-screen p-4 md:p-8 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
@@ -50,7 +40,6 @@ export default async function ResearchPage() {
                 Back Home
               </Button>
             </Link>
-            {/* Print button uses onClick - client-side */}
             <PrintButton />
           </div>
 

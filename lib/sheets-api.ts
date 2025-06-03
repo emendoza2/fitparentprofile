@@ -78,6 +78,7 @@ export const DimensionSchema = z.object({
   description: z.string(),
   welcome_title: z.string(),
   welcome_description: z.string(),
+  levels: z.string().array(),
 });
 
 export const ResourceIndicatorSchema = z.object({
@@ -133,7 +134,23 @@ export async function getIndicators() {
 
 export async function getDimensions() {
   if (!DIMENSIONS_URL) throw new Error("DIMENSIONS_URL env var not set");
-  return fetchDataFromCSVUrl(DIMENSIONS_URL, DimensionSchema);
+  return fetchDataFromCSVUrl(DIMENSIONS_URL, DimensionSchema, (records) => {
+    return records.map((record) => {
+      const recordObj = record as Record<string, string>;
+      const levels = [
+        recordObj["Level 0"],
+        recordObj["Level 1"],
+        recordObj["Level 2"],
+        recordObj["Level 3"],
+        recordObj["Level 4"],
+        recordObj["Level 5"],
+      ];
+      return {
+        ...recordObj,
+        levels,
+      };
+    });
+  });
 }
 
 export async function getPrayerChallenges() {

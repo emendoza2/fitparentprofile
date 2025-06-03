@@ -13,7 +13,7 @@ export default function CallToAction() {
       {/* Time indicator */}
       <div className="text-muted-foreground text-xs pt-2">
         <p>
-          <Timer className="inline" size={12} /> Takes 30–60 minutes
+          <Timer className="inline" size={12} /> Takes 15&ndash;20 minutes
         </p>
       </div>
     </div>

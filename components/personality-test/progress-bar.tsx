@@ -1,6 +1,8 @@
 import { Progress } from "@/components/ui/progress";
 import { useStore } from "zustand";
 import { personalityTestStore } from "@/lib/store/personality-test-store";
+import { useAssessment } from "@/lib/store/assessment-sync";
+import { useQuestions } from "@/lib/use-assessment-sheets";
 
 export function ProgressBar({
   totalPages,
@@ -9,13 +11,12 @@ export function ProgressBar({
   totalPages: number;
   questionsPerPage: number;
 }) {
-  const currentPage = useStore(
-    personalityTestStore,
-    (state) => state.currentPage
-  );
-  const questionProgress = useStore(personalityTestStore, (state) =>
-    state.getQuestionProgress({ totalPages, questionsPerPage })
-  );
+  const { data: questions } = useQuestions();
+  const totalQuestions = questions?.length ?? 0;
+  const { data: assessment } = useAssessment();
+  const currentPage = assessment.current_page;
+  const questionProgress =
+    (Object.keys(assessment.answers).length / totalQuestions) * 100;
 
   return (
     <div className="space-y-2 flex-1">

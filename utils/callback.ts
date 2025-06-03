@@ -19,3 +19,19 @@ export function goBackOr(router: NextRouter, fallback = "/") {
 export function addCallback(path: string, callback: string) {
   return `${path}?callback=${encodeURIComponent(callback)}`;
 }
+
+/**
+ * Ensures a URL is absolute (prepends window.location.origin if relative)
+ */
+export function toAbsoluteUrl(url?: string | null): string | undefined {
+  if (!url) return undefined;
+  try {
+    new URL(url);
+    return url;
+  } catch {
+    if (typeof window !== "undefined") {
+      return window.location.origin + url;
+    }
+    return undefined;
+  }
+}

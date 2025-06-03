@@ -19,6 +19,9 @@ import { SharingOptions } from "@/components/results/sharing-options";
 import { AuthProvider } from "./auth/context";
 import { User } from "@supabase/supabase-js";
 import { PersonalityTestProvider } from "./personality-test/personality-test-context";
+import { QuestionSchema } from "@/lib/sheets-api";
+import { z } from "zod";
+import { DimensionScores } from "@/utils/assessment/get-dimension-scores";
 
 // Format scores for radar chart with custom colors
 interface RadarChartDatum {
@@ -30,7 +33,7 @@ interface RadarChartDatum {
 }
 
 const formatScoresForRadarChart = (
-  scores: Record<string, [number, number[]]>
+  scores: DimensionScores
 ): RadarChartDatum[] => {
   return Object.entries(scores).map(([dimension, [score]]) => ({
     dimension,
@@ -147,27 +150,6 @@ const downloadPDF = async () => {
     html2pdf.default().from(element).set(opt).save();
     // dismiss();
   });
-};
-
-// Fixed getScoreInterpretation function to handle all score ranges properly
-const getScoreInterpretation = (
-  dimension: string,
-  score: number,
-  principlesData: PrinciplesData
-) => {
-  // Get the levels from the principles data
-  const levels = principlesData[dimension]?.levels || [];
-
-  // Determine the appropriate interpretation based on score
-  if (score < 25) {
-    return levels[1] || "Needs immediate attention.";
-  } else if (score < 50) {
-    return levels[2] || "Needs growth.";
-  } else if (score < 75) {
-    return levels[3] || "Good.";
-  } else {
-    return levels[4] || "Excellent.";
-  }
 };
 
 function DotResponseIndicator({
@@ -358,23 +340,25 @@ function DetailedResources({
 }
 
 export default function ResultsClient({
-  principlesData,
   user,
+  data,
 }: {
-  principlesData: PrinciplesData;
+  data: DimensionScores;
   user: User | null;
 }) {
   const isLoggedIn = !!user;
   return (
     <AuthProvider>
-      <PersonalityTestProvider
-        principlesData={principlesData}
+      {/* <PersonalityTestProvider
+        // principlesData={principlesData}
+        data={data}
+        questions={questions}
         questionPages={[]}
         totalPages={0}
         questionsPerPage={0}
-      >
-        <ResultSheet principlesData={principlesData} isLoggedIn={isLoggedIn} />
-      </PersonalityTestProvider>
+      > */}
+      <ResultSheet data={data} isLoggedIn={isLoggedIn} />
+      {/* </PersonalityTestProvider> */}
       <SharingOptions />
     </AuthProvider>
   );

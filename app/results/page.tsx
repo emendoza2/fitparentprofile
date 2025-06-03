@@ -1,21 +1,46 @@
-import { Suspense } from "react";
-import { getPrinciples } from "@/lib/principles";
+"use client";
+
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
 import { Toaster } from "@/components/ui/sonner";
 import ResultsClient from "@/components/results-client";
-import { createClient } from "@/utils/supabase/server";
+import { useAuth } from "@/components/auth/context";
+import { getPrinciples } from "@/lib/principles";
+import { useAssessment } from "@/lib/store/assessment-sync";
+import { useQuestions } from "@/lib/use-assessment-sheets";
+import {
+  DimensionScores,
+  getDimensionScores,
+} from "@/utils/assessment/get-dimension-scores";
+import { useRouter } from "next/navigation";
 
-// Server component
-export default async function Results() {
-  // Fetch principles data on the server
-  const principlesData = await getPrinciples();
-  const supabase = await createClient();
+export default function Results() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
   const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+    data: { answers },
+    loading: assessmentLoading,
+  } = useAssessment(user?.id); // if the user exists, passing this will allow the results to sync.
+  const { data: questions, isLoading, error } = useQuestions();
+  const data: DimensionScores = useMemo(
+    () => getDimensionScores(answers, questions),
+    [questions, answers]
+  );
+  useEffect(() => {
+    if (!user && !loading) {
+      const currentPath = window.location.pathname + window.location.search;
+      router.replace(`/signup?callback=${encodeURIComponent(currentPath)}`);
+    }
+  }, [user, loading, router]);
+
+  // const [principlesData, setPrinciplesData] = useState<any>(null);
+
+  // useEffect(() => {
+  //   getPrinciples().then(setPrinciplesData);
+  // }, []);
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
@@ -24,7 +49,7 @@ export default async function Results() {
           <CardContent className="p-6 md:p-8 space-y-6" id="printable">
             <div className="flex justify-center">
               <Image
-                src="/fit-parenting-logo.jpeg"
+                src="/logo.svg"
                 width={200}
                 height={200}
                 alt="FIT Parenting Logo"
@@ -40,8 +65,12 @@ export default async function Results() {
               </p>
             </div>
 
-            <Suspense fallback={<div>Loading results...</div>}>
-              <ResultsClient principlesData={principlesData} user={user} />
+            <Suspense>
+              {data && !assessmentLoading ? (
+                <ResultsClient data={data} user={user} />
+              ) : (
+                <div>Loading results...</div>
+              )}
             </Suspense>
 
             <p className="mb-2 text-center">

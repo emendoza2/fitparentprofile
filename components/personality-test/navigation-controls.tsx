@@ -7,21 +7,28 @@ import {
   Question,
 } from "@/lib/store/personality-test-store";
 import { useStore } from "zustand";
+import { useAssessment } from "@/lib/store/assessment-sync";
+import { z } from "zod";
+import { QuestionSchema } from "@/lib/sheets-api";
 
 export function NavigationControls({
   totalPages,
-  principlesData,
+  // principlesData,
   questionPages,
   onSubmit,
 }: {
   totalPages: number;
-  principlesData: PrinciplesData;
-  questionPages: Question[][];
+  // principlesData: PrinciplesData;
+  questionPages: z.infer<typeof QuestionSchema>[][];
   onSubmit: () => void;
 }) {
   const router = useRouter();
-  const { currentPage, isPageComplete, setCurrentPage, setDirection } =
-    useStore(personalityTestStore);
+  const { setDirection } = useStore(personalityTestStore);
+  const { data: assessment, setCurrentPage } = useAssessment();
+  const currentPage = assessment.current_page;
+  const isPageComplete = questionPages[currentPage].every(
+    (q) => assessment.answers[q.id] > 0
+  );
 
   const goToNextPage = () => {
     if (currentPage < totalPages - 1) {
@@ -58,7 +65,7 @@ export function NavigationControls({
 
       <Button
         onClick={goToNextPage}
-        disabled={!isPageComplete({ questionPages })}
+        disabled={!isPageComplete}
         className="flex items-center gap-2"
       >
         {currentPage === totalPages - 1 ? "See Results" : "Next"}

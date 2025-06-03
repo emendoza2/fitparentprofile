@@ -8,6 +8,7 @@ import {
   Tooltip,
 } from "recharts";
 import { dimensionColors } from "@/lib/questions";
+import { DimensionScores } from "@/utils/assessment/get-dimension-scores";
 
 interface RadarChartDatum {
   dimension: string;
@@ -18,22 +19,24 @@ interface RadarChartDatum {
 }
 
 const formatScoresForRadarChart = (
-  scores: Record<string, [number, number[]]>
+  scores: DimensionScores
 ): RadarChartDatum[] => {
   return Object.entries(scores).map(([dimension, [score]]) => ({
     dimension,
     score,
     fullMark: 100,
-    fill: dimensionColors[dimension as keyof typeof dimensionColors].fill,
-    stroke: dimensionColors[dimension as keyof typeof dimensionColors].stroke,
+    fill: (
+      dimensionColors[dimension as keyof typeof dimensionColors] ??
+      dimensionColors["TRUTH-SEEKING"]
+    ).fill,
+    stroke: (
+      dimensionColors[dimension as keyof typeof dimensionColors] ??
+      dimensionColors["TRUTH-SEEKING"]
+    ).stroke,
   }));
 };
 
-export function RadarChartSection({
-  data,
-}: {
-  data: Record<string, [number, number[]]>;
-}) {
+export function RadarChartSection({ data }: { data: DimensionScores }) {
   const radarData = formatScoresForRadarChart(data);
   const [hoveredDimension, setHoveredDimension] =
     useState<RadarChartDatum | null>(null);

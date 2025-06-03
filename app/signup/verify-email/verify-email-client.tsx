@@ -1,6 +1,5 @@
 "use client";
 
-import { signup } from "@/app/signup/actions";
 import { Button } from "@/components/ui/button";
 import {
   CardContent,
@@ -25,9 +24,11 @@ import { createClient } from "@/utils/supabase/client";
 import { EMPTY_FORM_STATE } from "@/utils/to-form-state";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Mail } from "lucide-react";
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useSignup } from "@/hooks/use-signup";
+import { useRouter } from "next/navigation";
 
 const changeEmailSchema = z.object({
   newEmail: z.string().email(),
@@ -35,20 +36,11 @@ const changeEmailSchema = z.object({
 
 export default function VerifyEmailClient() {
   const email = signupDetailsStore((s) => s.email);
-  const [signupState, signupFormAction] = useActionState(
-    signup,
-    EMPTY_FORM_STATE
-  );
-  const [pendingSignup, startSignupTransition] = useTransition();
-
   const [showChangeEmail, setShowChangeEmail] = useState(false);
   const [isResending, setIsResending] = useState(false);
-  const [isChanging, setIsChanging] = useState(false);
 
-  const changeEmailForm = useForm({
-    resolver: zodResolver(changeEmailSchema),
-    defaultValues: { newEmail: "" },
-  });
+  const { signup, loading: signupLoading, error: signupError } = useSignup();
+  const router = useRouter();
 
   useEffect(() => {
     console.log("email", email);
@@ -79,10 +71,7 @@ export default function VerifyEmailClient() {
     }
   };
 
-  // The way we're doing it here, progressive enhancement is not happening
-  const handleChangeEmail = (values: { newEmail: string }) => {
-    setIsChanging(true);
-    // Get other signup details from Zustand store
+  const handleChangeEmail = async (values: { newEmail: string }) => {
     const { name, password, acceptTerms, callback } =
       signupDetailsStore.getState();
     if (!name || !password || !acceptTerms) {
@@ -92,40 +81,24 @@ export default function VerifyEmailClient() {
           "We couldn't find your previous signup details. Please restart the signup process.",
         variant: "destructive",
       });
-      setIsChanging(false);
       return;
     }
-    // Call the signup action with the new email and other details
-    try {
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("email", values.newEmail);
-      formData.append("password", password);
-      formData.append("confirmPassword", password);
-      formData.append("acceptTerms", "true");
-      formData.append("callback", callback || "");
-      // Use fetch to POST to the signup endpoint
-      startSignupTransition(async () => {
-        await signupFormAction(formData);
-      });
-      signupDetailsStore.getState().setSignupDetails({
-        email: values.newEmail,
-        callback,
-        name,
-        password,
-        acceptTerms,
-      });
-    } catch (error) {
-      toast({
-        title: "Change email failed",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
-    }
-    setIsChanging(false);
+    await signup({
+      name,
+      email: values.newEmail,
+      password,
+      confirmPassword: password,
+      acceptTerms: true,
+      callback: callback || "",
+    } as any);
+    signupDetailsStore.getState().setSignupDetails({
+      email: values.newEmail,
+      callback,
+      name,
+      password,
+      acceptTerms,
+    });
   };
-
-  const noScriptFallback = useToastMessage(signupState);
 
   return (
     <>
@@ -186,13 +159,15 @@ export default function VerifyEmailClient() {
 
         {showChangeEmail && (
           <ChangeEmailForm
-            signupState={signupState}
-            signupFormAction={signupFormAction}
+            onChangeEmail={handleChangeEmail}
+            loading={signupLoading}
           />
         )}
       </CardContent>
       <CardFooter className="flex flex-col gap-4 pt-2">
-        {noScriptFallback}
+        {signupError && (
+          <div className="text-red-500 text-center">{signupError}</div>
+        )}
         <div className="text-center text-sm text-muted-foreground">
           Need help?{" "}
           <a
@@ -208,79 +183,22 @@ export default function VerifyEmailClient() {
 }
 
 function ChangeEmailForm({
-  signupFormAction,
+  onChangeEmail,
+  loading,
 }: {
-  signupState: any;
-  signupFormAction: (payload: FormData) => void;
+  onChangeEmail: (values: { newEmail: string }) => void;
+  loading: boolean;
 }) {
-  const email = signupDetailsStore((s) => s.email);
-  const [pendingSignup, startSignupTransition] = useTransition();
-
-  const [isChanging, setIsChanging] = useState(false);
-
   const changeEmailForm = useForm({
     resolver: zodResolver(changeEmailSchema),
     defaultValues: { newEmail: "" },
   });
 
-  useEffect(() => {
-    console.log("email", email);
-    if (!email) {
-      // return router.push("/signup");
-    }
-  }, [email]);
-
-  // The way we're doing it here, progressive enhancement is not happening
-  const handleChangeEmail = (values: { newEmail: string }) => {
-    setIsChanging(true);
-    // Get other signup details from Zustand store
-    const { name, password, acceptTerms, callback } =
-      signupDetailsStore.getState();
-    if (!name || !password || !acceptTerms) {
-      toast({
-        title: "Missing details",
-        description:
-          "We couldn't find your previous signup details. Please restart the signup process.",
-        variant: "destructive",
-      });
-      setIsChanging(false);
-      return;
-    }
-    // Call the signup action with the new email and other details
-    try {
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("email", values.newEmail);
-      formData.append("password", password);
-      formData.append("confirmPassword", password);
-      formData.append("acceptTerms", "true");
-      formData.append("callback", callback || "");
-      // Use fetch to POST to the signup endpoint
-      startSignupTransition(async () => {
-        await signupFormAction(formData);
-      });
-      signupDetailsStore.getState().setSignupDetails({
-        email: values.newEmail,
-        callback,
-        name,
-        password,
-        acceptTerms,
-      });
-    } catch (error) {
-      toast({
-        title: "Change email failed",
-        description: (error as Error).message,
-        variant: "destructive",
-      });
-    }
-    setIsChanging(false);
-  };
-
   return (
     <div className="mt-4">
       <Form {...changeEmailForm}>
         <form
-          onSubmit={changeEmailForm.handleSubmit(handleChangeEmail)}
+          onSubmit={changeEmailForm.handleSubmit(onChangeEmail)}
           className="space-y-4"
           autoComplete="off"
         >
@@ -297,12 +215,8 @@ function ChangeEmailForm({
               </FormItem>
             )}
           />
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isChanging || pendingSignup}
-          >
-            {isChanging || pendingSignup ? (
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 Sending...

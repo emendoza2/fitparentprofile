@@ -1,8 +1,10 @@
-// In Next.js, this file would be called: app/providers.tsx
 "use client";
 
+import { getDimensions } from "@/lib/sheets-api";
 // Since QueryClientProvider relies on useContext under the hood, we have to put 'use client' on top
 import {
+  dehydrate,
+  HydrationBoundary,
   isServer,
   QueryClient,
   QueryClientProvider,
@@ -22,7 +24,7 @@ function makeQueryClient() {
 
 let browserQueryClient: QueryClient | undefined = undefined;
 
-function getQueryClient() {
+export function getQueryClient() {
   if (isServer) {
     // Server: always make a new query client
     return makeQueryClient();

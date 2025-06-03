@@ -11,33 +11,25 @@ import {
 } from "@/components/ui/dialog";
 import { HelpCircle } from "lucide-react";
 import { useAuth } from "../auth/context";
-
-function getScoreInterpretation(
-  dimension: string,
-  score: number,
-  principlesData: PrinciplesData
-) {
-  const levels = principlesData[dimension]?.levels || [];
-  if (score < 25) {
-    return levels[1] || "Needs immediate attention.";
-  } else if (score < 50) {
-    return levels[2] || "Needs growth.";
-  } else if (score < 75) {
-    return levels[3] || "Good.";
-  } else {
-    return levels[4] || "Excellent.";
-  }
-}
+import { DimensionScores } from "@/utils/assessment/get-dimension-scores";
+import { z } from "zod";
+import { DimensionSchema, QuestionSchema } from "@/lib/sheets-api";
+import {
+  useDimensionResearchScripture,
+  useDimensions,
+} from "@/lib/use-assessment-sheets";
+import { getScoreInterpretation } from "@/utils/assessment/get-score-interpretation";
 
 function DimensionSummary({
   dimension,
   score,
-  principlesData,
 }: {
   dimension: string;
   score: number;
-  principlesData: PrinciplesData;
 }) {
+  const { data: dimensions } = useDimensions();
+  const dimensionMap =
+    dimensions && Object.fromEntries(dimensions.map((d) => [d.dimension, d]));
   const colorKey = dimension as keyof typeof dimensionColors;
   return (
     <div className="space-y-2">
@@ -45,13 +37,14 @@ function DimensionSummary({
         <h3
           className={cn(
             "font-medium flex items-center",
-            dimensionColors[colorKey].color
+            (dimensionColors[colorKey] ?? dimensionColors["TRUTH-SEEKING"])
+              .color
           )}
         >
           <span
             className={cn(
               "inline-block w-3 h-3 rounded-full mr-2",
-              dimensionColors[colorKey].bg
+              (dimensionColors[colorKey] ?? dimensionColors["TRUTH-SEEKING"]).bg
             )}
           ></span>
           {dimension}
@@ -63,7 +56,7 @@ function DimensionSummary({
               <DialogHeader>
                 <DialogTitle>{dimension}</DialogTitle>
               </DialogHeader>
-              <p>{principlesData[dimension].why}</p>
+              <p>{dimensionMap?.[dimension]?.why}</p>
             </DialogContent>
           </Dialog>
         </h3>
@@ -72,32 +65,26 @@ function DimensionSummary({
       <Progress
         value={score}
         className="h-2"
-        indicatorClassName={dimensionColors[colorKey].bgTranslucent}
+        indicatorClassName={
+          (dimensionColors[colorKey] ?? dimensionColors["TRUTH-SEEKING"])
+            .bgTranslucent
+        }
       />
-      <p className="text-sm text-muted-foreground">
-        {getScoreInterpretation(dimension, score, principlesData)}
-      </p>
+      {dimensionMap && (
+        <p className="text-sm text-muted-foreground">
+          {getScoreInterpretation(dimension, score, dimensionMap)}
+        </p>
+      )}
     </div>
   );
 }
 
-export function DimensionSummaryList({
-  data,
-  principlesData,
-}: {
-  data: Record<string, [number, number[]]>;
-  principlesData: PrinciplesData;
-}) {
+export function DimensionSummaryList({ data }: { data: DimensionScores }) {
   return (
     <div className="py-4 space-y-6 border-t">
       <h3 className="text-lg font-semibold">Summary</h3>
       {Object.entries(data).map(([dimension, [score]]) => (
-        <DimensionSummary
-          key={dimension}
-          dimension={dimension}
-          score={score}
-          principlesData={principlesData}
-        />
+        <DimensionSummary key={dimension} dimension={dimension} score={score} />
       ))}
     </div>
   );

@@ -8,12 +8,11 @@ import {
 } from "@/components/ui/dialog";
 import { useStore } from "zustand";
 import { personalityTestStore } from "@/lib/store/personality-test-store";
+import { useAssessment } from "@/lib/store/assessment-sync";
 
 export function TestHeader({ totalPages }: { totalPages: number }) {
-  const currentPage = useStore(
-    personalityTestStore,
-    (state) => state.currentPage
-  );
+  const { data: assessment } = useAssessment();
+  const currentPage = assessment.current_page;
 
   return (
     <div className="mb-8">

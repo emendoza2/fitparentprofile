@@ -4,21 +4,23 @@ import { Badge } from "@/components/ui/badge";
 import { dimensionColors } from "@/lib/questions";
 import { cn, properCase, titleCase } from "@/lib/utils";
 import { PrinciplesData } from "@/lib/types";
+import { z } from "zod";
+import { DimensionSchema } from "@/lib/sheets-api";
 
 interface PrinciplesListProps {
-  principlesData: PrinciplesData;
+  dimensions: z.infer<typeof DimensionSchema>[];
 }
 
-export default function PrinciplesList({
-  principlesData,
-}: PrinciplesListProps) {
+export default function PrinciplesList({ dimensions }: PrinciplesListProps) {
   // Create a principles array from the fetched data
-  const principles = Object.entries(principlesData).map(([id, data]) => ({
-    title: data.welcome?.title || titleCase(id),
-    badge: properCase(id),
-    description: data.description || "",
-    color: dimensionColors[id as keyof typeof dimensionColors]?.color || "",
-    id,
+  const principles = dimensions.map((dim) => ({
+    title: dim.welcome_title || titleCase(dim.dimension),
+    badge: properCase(dim.dimension),
+    description: dim.welcome_description || "",
+    color:
+      dimensionColors[dim.dimension as keyof typeof dimensionColors]?.color ||
+      "",
+    id: dim.dimension,
   }));
 
   return (

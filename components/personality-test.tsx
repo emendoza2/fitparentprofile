@@ -14,6 +14,13 @@ import {
 } from "@/lib/store/personality-test-store";
 import { useStore } from "zustand";
 import { useRouter } from "next/navigation";
+import { getDimensionScores } from "@/utils/assessment/get-dimension-scores";
+import { useAssessment } from "@/lib/store/assessment-sync";
+import { useQuestions } from "@/lib/use-assessment-sheets";
+import { z } from "zod";
+import { QuestionSchema } from "@/lib/sheets-api";
+import { useTest } from "@/app/assessment/getTest";
+import { useAuth } from "./auth/context";
 
 // Sample data for preview
 const getDummyData = () => {
@@ -31,23 +38,19 @@ function PersonalityTestInner({
   questionPages,
   totalPages,
   questionsPerPage,
-  principlesData,
+  // principlesData,
   onSubmit,
 }: {
-  questionPages: Question[][];
+  questionPages: z.infer<typeof QuestionSchema>[][];
   totalPages: number;
   questionsPerPage: number;
-  principlesData: PrinciplesData;
+  // principlesData: PrinciplesData;
   onSubmit: () => void;
 }) {
-  const currentPage = useStore(
-    personalityTestStore,
-    (state) => state.currentPage
-  );
+  const { data: assessment } = useAssessment();
+  const currentPage = assessment.current_page;
   const direction = useStore(personalityTestStore, (state) => state.direction);
-  const currentPageQuestions = useStore(personalityTestStore, (state) =>
-    state.getCurrentPageQuestions({ questionPages })
-  );
+  const currentPageQuestions = questionPages[currentPage];
 
   if (questionPages.length === 0) {
     return (
@@ -84,11 +87,13 @@ function PersonalityTestInner({
                 <TestHeader totalPages={totalPages} />
 
                 <div className="space-y-10">
-                  {currentPageQuestions.map((_, questionIndex) => (
+                  {currentPageQuestions.map((question, questionIndex) => (
                     <QuestionDisplay
                       key={currentPage + questionIndex}
+                      question={question}
                       questionIndex={questionIndex}
-                      questionPages={questionPages}
+                      // questionPages={questionPages}
+                      // currentPageQuestions={currentPageQuestions}
                     />
                   ))}
                 </div>
@@ -99,7 +104,7 @@ function PersonalityTestInner({
 
         <NavigationControls
           totalPages={totalPages}
-          principlesData={principlesData}
+          // principlesData={principlesData}
           questionPages={questionPages}
           onSubmit={onSubmit}
         />
@@ -108,36 +113,64 @@ function PersonalityTestInner({
   );
 }
 
-export function PersonalityTest({
-  principlesData,
-  interlacedQuestions,
-  totalPages = 10,
-  questionsPerPage = 10,
-}: {
-  principlesData: PrinciplesData; // server-side fetched
-  interlacedQuestions: Question[][];
-  totalPages: number;
-  questionsPerPage: number;
+export function PersonalityTest({}: // principlesData,
+// questions,
+// interlacedQuestions,
+// totalPages = 10,
+// questionsPerPage = 10,
+{
+  // principlesData: PrinciplesData; // server-side fetched
+  // questions: z.infer<typeof QuestionSchema>[] | undefined;
+  // interlacedQuestions: Question[][];
+  // totalPages: number;
+  // questionsPerPage: number;
 }) {
-  const router = useRouter();
-  const calculateCompactAnswers = useStore(
-    personalityTestStore,
-    (state) => state.calculateCompactAnswers
-  );
-  const handleSubmit = () => {
-    const compactData = calculateCompactAnswers({ principlesData });
+  const { user, loading } = useAuth();
+  const isLoggedIn = !!user;
 
-    router.push(
-      "results?data=" + encodeURIComponent(btoa(JSON.stringify(compactData)))
-    );
+  const { data: testData, isLoading } = useTest();
+  const { data: questions } = useQuestions();
+
+  const router = useRouter();
+  // const calculateCompactAnswers = useStore(
+  //   personalityTestStore,
+  //   (state) => state.calculateCompactAnswers
+  // );
+  // const handleSubmit = () => {
+  //   const compactData = getDimensionScores()
+
+  //   router.push(
+  //     "results?data=" + encodeURIComponent(btoa(JSON.stringify(compactData)))
+  //   );
+  //   window.scrollTo(0, 0);
+  // };
+
+  const { data: assessment } = useAssessment();
+
+  const handleSubmit = () => {
+    const compactData = getDimensionScores(assessment?.answers, questions);
+    const resultsPath =
+      "/results?data=" + encodeURIComponent(btoa(JSON.stringify(compactData)));
+    if (isLoggedIn) {
+      router.push(resultsPath);
+    } else {
+      router.push(`signup?callback=` + encodeURIComponent(resultsPath));
+      // TODO: Save the assessment to local storage
+    }
     window.scrollTo(0, 0);
   };
+
+  if (isLoading || !testData) {
+    return <main className="container mx-auto py-8 px-4">Loading...</main>;
+  }
+
+  const { interlacedQuestions, totalPages, questionsPerPage } = testData ?? {};
+
   return (
     <PersonalityTestInner
       questionPages={interlacedQuestions}
       totalPages={totalPages}
       questionsPerPage={questionsPerPage}
-      principlesData={principlesData}
       onSubmit={handleSubmit}
     />
   );
