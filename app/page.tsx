@@ -1,5 +1,4 @@
 import { getDimensions } from "@/lib/sheets-api";
-import { getQueryClient } from "./query-providers";
 import Welcome from "./welcome";
 import {
   dehydrate,
