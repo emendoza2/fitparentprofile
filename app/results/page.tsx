@@ -44,7 +44,7 @@ export default function Results() {
   // }, []);
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+    <main className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-4xl mx-auto relative">
         {user && (
           <div className="absolute top-4 right-4 z-10">
