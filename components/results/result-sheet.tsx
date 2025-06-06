@@ -1,26 +1,19 @@
-import { PrinciplesData } from "@/lib/types";
-import { ScoreSummary } from "@/components/results/score-summary";
-import { RadarChartSection } from "@/components/results/radar-chart-section";
 import { DimensionSummaryList } from "@/components/results/dimension-summary-list";
-import { DetailedResponsesSection } from "@/components/results/detailed-responses-section";
-import { usePathname, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { RadarChartSection } from "@/components/results/radar-chart-section";
+import { ScoreSummary } from "@/components/results/score-summary";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardTitle,
-  CardHeader,
   CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
-import { addCallback } from "@/utils/callback";
-import { useMemo, useRef } from "react";
-import { personalityTestStore } from "@/lib/store/personality-test-store";
-import { useStore } from "zustand";
-import { z } from "zod";
-import { QuestionSchema } from "@/lib/sheets-api";
 import { DimensionScores } from "@/utils/assessment/get-dimension-scores";
+import { addCallback } from "@/utils/callback";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import QRCode from "react-qr-code";
 
 function AppDownloadBanner() {

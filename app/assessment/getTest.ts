@@ -1,9 +1,7 @@
 import { getPrinciples } from "@/lib/principles";
-// import { getPrinciples } from "@/lib/principles";
-import { createInterlacedQuestions } from "./createInterlacedQuestions";
-import { useQuery } from "@tanstack/react-query";
 import { useQuestions } from "@/lib/use-assessment-sheets";
 import { useMemo } from "react";
+import { createInterlacedQuestions } from "./createInterlacedQuestions";
 
 function splitmix32(a: number) {
   return function () {
@@ -104,7 +102,6 @@ export function useTest() {
 
   return {
     data: {
-      // principlesData,
       interlacedQuestions,
       totalPages,
       questionsPerPage,

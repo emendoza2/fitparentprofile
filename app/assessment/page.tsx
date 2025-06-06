@@ -1,5 +1,3 @@
-"use client";
-
 import { getQuestions } from "@/lib/sheets-api";
 import { PersonalityTest } from "@/components/personality-test";
 import {

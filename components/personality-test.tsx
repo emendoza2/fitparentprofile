@@ -1,41 +1,23 @@
 "use client";
-import { Card, CardContent } from "@/components/ui/card";
-import { dimensions } from "@/lib/questions";
-import { AnimatePresence, motion } from "framer-motion";
-import { PrinciplesData } from "@/lib/types";
-import { QuestionDisplay } from "./personality-test/question-display";
-import { ProgressBar } from "./personality-test/progress-bar";
-import { NavigationControls } from "./personality-test/navigation-controls";
-import { TestHeader } from "./personality-test/test-header";
-import { PersonalityTestProvider } from "./personality-test/personality-test-context";
-import {
-  personalityTestStore,
-  Question,
-} from "@/lib/store/personality-test-store";
-import { useStore } from "zustand";
-import { useRouter } from "next/navigation";
-import { getDimensionScores } from "@/utils/assessment/get-dimension-scores";
-import { useAssessment } from "@/lib/store/assessment-sync";
-import { useQuestions } from "@/lib/use-assessment-sheets";
-import { z } from "zod";
-import { QuestionSchema } from "@/lib/sheets-api";
 import { useTest } from "@/app/assessment/getTest";
-import { useAuth } from "./auth/context";
-import { toast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import ProfileDropdown from "@/components/ui/profile-dropdown";
-
-// Sample data for preview
-const getDummyData = () => {
-  const dummyScores: Record<string, number> = {};
-
-  dimensions.forEach((dimension) => {
-    // Generate random scores between 40 and 80 for a balanced profile
-    dummyScores[dimension] = Math.floor(Math.random() * 40) + 40;
-  });
-
-  return dummyScores;
-};
+import { toast } from "@/hooks/use-toast";
+import { QuestionSchema } from "@/lib/sheets-api";
+import { useAssessment } from "@/lib/store/assessment-sync";
+import { personalityTestStore } from "@/lib/store/personality-test-store";
+import { useQuestions } from "@/lib/use-assessment-sheets";
+import { getDimensionScores } from "@/utils/assessment/get-dimension-scores";
+import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { z } from "zod";
+import { useStore } from "zustand";
+import { useAuth } from "./auth/context";
+import { NavigationControls } from "./personality-test/navigation-controls";
+import { ProgressBar } from "./personality-test/progress-bar";
+import { QuestionDisplay } from "./personality-test/question-display";
+import { TestHeader } from "./personality-test/test-header";
 
 function PersonalityTestInner({
   questionPages,
@@ -116,18 +98,7 @@ function PersonalityTestInner({
   );
 }
 
-export function PersonalityTest({}: // principlesData,
-// questions,
-// interlacedQuestions,
-// totalPages = 10,
-// questionsPerPage = 10,
-{
-  // principlesData: PrinciplesData; // server-side fetched
-  // questions: z.infer<typeof QuestionSchema>[] | undefined;
-  // interlacedQuestions: Question[][];
-  // totalPages: number;
-  // questionsPerPage: number;
-}) {
+export function PersonalityTest() {
   const { user, loading } = useAuth();
   const isLoggedIn = !!user;
   const router = useRouter();
@@ -200,8 +171,18 @@ export function PersonalityTest({}: // principlesData,
           <a href="/results" className="underline text-sky-11">
             results
           </a>{" "}
-          or <span className="font-semibold">retake</span> from the notice
-          above.
+          or{" "}
+          <button
+            className="font-semibold hover:underline"
+            onClick={() => {
+              reset();
+              setAllowRetake(true);
+              toast({ title: "You can now retake the test." });
+            }}
+          >
+            retake
+          </button>
+          .
         </div>
       </main>
     );
@@ -211,7 +192,7 @@ export function PersonalityTest({}: // principlesData,
 
   return (
     <div className="w-full max-w-4xl mx-auto relative">
-      <div className="absolute top-4 right-4 z-10">
+      <div className="flex  w-full justify-end mb-4">
         <ProfileDropdown />
       </div>
       <PersonalityTestInner
