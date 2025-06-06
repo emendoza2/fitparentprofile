@@ -16,6 +16,10 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import QRCode from "react-qr-code";
 
+const APPLE_STORE_URL = "https://testflight.apple.com/join/c6QWRe9z";
+const GOOGLE_PLAY_URL =
+  "https://drive.google.com/file/d/1UP8NLyjP2Eq-GB5ijGpOE4756rlDnPwn/view?usp=sharing";
+
 function AppDownloadBanner() {
   return (
     <Card className="flex flex-row items-start">
@@ -37,7 +41,7 @@ function AppDownloadBanner() {
         <CardContent>
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex gap-2 items-center">
-              <Link href="#" className="h-10">
+              <Link href={APPLE_STORE_URL} className="h-10">
                 <Image
                   src="/app-store-dl.svg"
                   alt="Download on the App Store"
@@ -46,7 +50,7 @@ function AppDownloadBanner() {
                   className="h-full w-auto"
                 />
               </Link>
-              <Link href="#" className="h-10">
+              <Link href={GOOGLE_PLAY_URL} className="h-10">
                 <Image
                   src="/google-play-dl.svg"
                   alt="Get it on Google Play"
