@@ -1,6 +1,10 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+import tailwindConfig from "@/tailwind.config";
+import resolveConfig from "tailwindcss/resolveConfig";
+const { theme } = resolveConfig(tailwindConfig);
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -35,4 +39,9 @@ export function mapObjectValues<T, U>(
   return Object.fromEntries(
     Object.entries(obj).map(([key, value]) => [key, fn(value, key)])
   );
+}
+
+export function resolveColor(color: string) {
+  const colorPath = color.split("-");
+  return (theme as any)?.colors?.[colorPath[0]]?.[colorPath[1]] || "#000";
 }
