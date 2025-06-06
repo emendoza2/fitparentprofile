@@ -142,7 +142,7 @@ function LoginPageInner() {
               <div className="flex-grow border-t border-gray-200 dark:border-gray-700" />
             </div>
             {!showPassword ? (
-              <Form {...magicForm}>
+              <Form key="magic-form" {...magicForm}>
                 <form
                   onSubmit={magicForm.handleSubmit(async ({ email }) => {
                     setError(null);
@@ -199,7 +199,7 @@ function LoginPageInner() {
                 </form>
               </Form>
             ) : (
-              <Form {...passwordForm}>
+              <Form key="password-form" {...passwordForm}>
                 <form
                   onSubmit={passwordForm.handleSubmit(async (values) => {
                     setError(null);

@@ -11,7 +11,7 @@ export default function Welcome() {
   const { data: dimensions, isLoading } = useDimensions();
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+    <main className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-3xl mx-auto p-4">
         <Card className="shadow-lg">
           <CardContent className="p-6 md:p-8 space-y-6">
