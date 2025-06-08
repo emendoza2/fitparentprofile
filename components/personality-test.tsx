@@ -18,6 +18,7 @@ import { NavigationControls } from "./personality-test/navigation-controls";
 import { ProgressBar } from "./personality-test/progress-bar";
 import { QuestionDisplay } from "./personality-test/question-display";
 import { TestHeader } from "./personality-test/test-header";
+import { useRequireLogin } from "@/hooks/use-require-login";
 
 function PersonalityTestInner({
   questionPages,
@@ -99,7 +100,7 @@ function PersonalityTestInner({
 }
 
 export function PersonalityTest() {
-  const { user, loading } = useAuth();
+  const { user, isLoading: loading } = useAuth();
   const isLoggedIn = !!user;
   const router = useRouter();
 
@@ -110,13 +111,7 @@ export function PersonalityTest() {
   const [showRetakePrompt, setShowRetakePrompt] = useState(false);
   const [allowRetake, setAllowRetake] = useState(false);
 
-  // Redirect to signup if not logged in
-  useEffect(() => {
-    if (!loading && !user) {
-      const callback = encodeURIComponent("/assessment");
-      router.replace(`/signup?callback=${callback}`);
-    }
-  }, [user, loading, router]);
+  useRequireLogin();
 
   useEffect(() => {
     if (

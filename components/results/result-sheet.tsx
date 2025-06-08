@@ -64,7 +64,7 @@ function AppDownloadBanner() {
         </CardContent>
       </div>
       <div className="mr-6 mt-6 bg-white p-2 rounded-lg shadow border">
-        <QRCode value="/store-redirect" size={86} />
+        <QRCode value="https://fitparent.app/store-redirect" size={86} />
       </div>
     </Card>
   );

@@ -16,26 +16,24 @@ import {
 } from "@/utils/assessment/get-dimension-scores";
 import { useRouter } from "next/navigation";
 import ProfileDropdown from "@/components/ui/profile-dropdown";
+import { useRequireLogin } from "@/hooks/use-require-login";
 
 export default function Results() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-
+  const { user, isLoading: authLoading } = useAuth();
   const {
     data: { answers },
-    loading: assessmentLoading,
+    isLoading: assessmentLoading,
   } = useAssessment(user?.id); // if the user exists, passing this will allow the results to sync.
-  const { data: questions, isLoading, error } = useQuestions();
+  const { data: questions, isLoading: questionsLoading } = useQuestions();
+
+  const isLoading = assessmentLoading || questionsLoading || authLoading;
+
   const data: DimensionScores = useMemo(
     () => getDimensionScores(answers, questions),
     [questions, answers]
   );
-  useEffect(() => {
-    if (!user && !loading) {
-      const currentPath = window.location.pathname + window.location.search;
-      router.replace(`/signup?callback=${encodeURIComponent(currentPath)}`);
-    }
-  }, [user, loading, router]);
+
+  useRequireLogin();
 
   // const [principlesData, setPrinciplesData] = useState<any>(null);
 
@@ -72,7 +70,7 @@ export default function Results() {
             </div>
 
             <Suspense>
-              {data && !assessmentLoading ? (
+              {data && !isLoading ? (
                 <ResultsClient data={data} user={user} />
               ) : (
                 <div>Loading results...</div>

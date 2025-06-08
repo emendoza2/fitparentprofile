@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { getQueryClient } from "@/app/query-providers";
 import { devtools, persist } from "zustand/middleware";
+import { useAuth } from "@/components/auth/context";
 
 export interface Assessment {
   current_page: number;
@@ -69,7 +70,8 @@ const useAssessmentBuffer = create<BufferState>()(
   )
 );
 
-export function useAssessment(userId?: string | null) {
+export function useAssessment() {
+  const { user, isLoading: authLoading } = useAuth();
   const qc = useQueryClient();
   const buf = useAssessmentBuffer();
 
@@ -155,7 +157,7 @@ export function useAssessment(userId?: string | null) {
 
   return {
     data: userId ? data : buf,
-    loading: isLoading,
+    isLoading: isLoading,
     setCurrentPage,
     setAnswer,
     reset,
